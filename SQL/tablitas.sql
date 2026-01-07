@@ -7,6 +7,7 @@ DROP TRIGGER IF EXISTS trigger_refresh_view_listas ON listas_personalizadas;
 DROP FUNCTION IF EXISTS refrescar_resumen_contribuciones;
 DROP MATERIALIZED VIEW IF EXISTS resumen_contribuciones_usuario CASCADE;
 
+DROP TABLE IF EXISTS rutas_sugeridas CASCADE;
 DROP TABLE IF EXISTS lista_sitios CASCADE;
 DROP TABLE IF EXISTS listas_personalizadas CASCADE;
 DROP TABLE IF EXISTS fotografias CASCADE;
@@ -87,6 +88,16 @@ CREATE TABLE lista_sitios (
     FOREIGN KEY (id_lista) REFERENCES listas_personalizadas(id) ON DELETE CASCADE,
     FOREIGN KEY (id_sitio) REFERENCES sitios_turisticos(id) ON DELETE CASCADE,
     PRIMARY KEY (id_lista, id_sitio)
+);
+
+CREATE TABLE rutas_sugeridas (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    id_usuario INT NOT NULL,
+    camino GEOMETRY(LINESTRING, 4326), -- Columna espacial para la línea de ruta
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 -- ================================================================================================
@@ -182,6 +193,7 @@ CREATE INDEX idx_fotografias_id_sitio ON fotografias(id_sitio);
 CREATE INDEX idx_fotografias_id_usuario ON fotografias(id_usuario);
 CREATE INDEX idx_sitios_tipo ON sitios_turisticos(tipo);
 CREATE INDEX idx_sitios_coordenadas ON sitios_turisticos USING GIST (coordenadas);
+CREATE INDEX idx_rutas_camino ON rutas_sugeridas USING GIST (camino);
 
 -- -----------------------------------------------------
 -- Fin del Script de Índices

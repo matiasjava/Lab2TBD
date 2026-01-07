@@ -180,5 +180,46 @@ public class SitioTuristicoRepository {
 
         return jdbc.query(sql, params, MAPPER);
     }
+
+    /**
+     * Busca sitios turísticos dentro de una zona definida por un polígono.
+     * Usa ST_Covers con un polígono construido desde texto (WKT).
+     * 
+     * @param puntos Lista de puntos [[lat, lon], [lat, lon], ...] que definen el polígono
+     * @return Lista de sitios turísticos dentro del polígono
+     */
+    public List<SitioTuristico> findEnZona(List<List<Double>> puntos) {
+        // Construir WKT Polygon: POLYGON((lon lat, lon lat, ..., lon_inicial lat_inicial))
+        StringBuilder wkt = new StringBuilder("POLYGON((");
+        for (List<Double> p : puntos) {
+            wkt.append(p.get(1)).append(" ").append(p.get(0)).append(",");
+        }
+        // Cerrar el polígono repitiendo el primer punto si no viene cerrado
+        List<Double> primerPunto = puntos.get(0);
+        List<Double> ultimoPunto = puntos.get(puntos.size() - 1);
+        
+        if (!primerPunto.equals(ultimoPunto)) {
+            wkt.append(primerPunto.get(1)).append(" ").append(primerPunto.get(0));
+        } else {
+            // Eliminar la última coma sobrante si ya estaba cerrado
+            wkt.deleteCharAt(wkt.length() - 1);
+        }
+        
+        wkt.append("))");
+
+        String sql = """
+            SELECT
+                id, nombre, descripcion, tipo, calificacion_promedio, total_reseñas,
+                ST_Y(coordenadas::geometry) AS latitud,
+                ST_X(coordenadas::geometry) AS longitud
+            FROM sitios_turisticos
+            WHERE ST_Covers(
+                ST_GeomFromText(:wkt, 4326),
+                coordenadas::geometry
+            )
+        """;
+
+        return jdbc.query(sql, Map.of("wkt", wkt.toString()), MAPPER);
+    }
 }
 

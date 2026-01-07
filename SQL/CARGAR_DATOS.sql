@@ -21,6 +21,7 @@ END $$;
 -- =============================================
 
 -- Usar TRUNCATE CASCADE para eliminar TODO
+TRUNCATE TABLE rutas_sugeridas RESTART IDENTITY CASCADE;
 TRUNCATE TABLE lista_sitios CASCADE;
 TRUNCATE TABLE listas_personalizadas CASCADE;
 TRUNCATE TABLE fotografias CASCADE;
@@ -262,6 +263,38 @@ BEGIN
     END;
 END $$;
 
+INSERT INTO rutas_sugeridas (nombre, descripcion, id_usuario, camino) VALUES
+(
+    'Ruta Histórica Santiago Centro',
+    'Un recorrido caminando desde el Bellas Artes, pasando por la Plaza de Armas hasta La Moneda.',
+    5, -- Creada por Elena (Guía turística)
+    ST_GeomFromText('LINESTRING(
+        -70.6418 -33.4350,  -- Museo Bellas Artes
+        -70.6477 -33.4398,  -- Teatro Municipal
+        -70.6510 -33.4372,  -- Plaza de Armas
+        -70.6538 -33.4426   -- La Moneda
+    )', 4326)
+),
+(
+    'Circuito de Parques en Bici',
+    'Ruta ideal para ciclistas conectando áreas verdes principales.',
+    8, -- Creada por Hector (Ciclista)
+    ST_GeomFromText('LINESTRING(
+        -70.6300 -33.4168,  -- Cerro San Cristóbal
+        -70.6100 -33.4050,  -- Parque Bicentenario
+        -70.6450 -33.4360   -- Parque Forestal
+    )', 4326)
+),
+(
+    'Paseo Gastronómico Lastarria',
+    'Breve recorrido por los mejores lugares para comer.',
+    2, -- Creada por Bruno (Amante de la gastronomía)
+    ST_GeomFromText('LINESTRING(
+        -70.6353 -33.4385,  -- Bocanáriz
+        -70.6380 -33.4340,  -- Liguria
+        -70.6360 -33.4320   -- Peumayén
+    )', 4326)
+);
 
 -- =============================================
 -- INSERTAR FOTOGRAFIAS

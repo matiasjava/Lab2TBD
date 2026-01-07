@@ -110,4 +110,27 @@ public class SitioTuristicoController {
             @RequestParam(required = false, defaultValue = "1000") Integer radio) {
         return service.getCercanos(lng, lat, radio);
     }
+
+    /**
+     * POST /api/sitios/zona
+     * Busca sitios turísticos dentro de una zona definida por un polígono.
+     * Requiere autenticación JWT.
+     *
+     * @param zona Objeto con la lista de puntos que definen el polígono
+     * @return Lista de sitios turísticos dentro del polígono
+     *
+     * Ejemplo de cuerpo de solicitud:
+     * {
+     *   "puntos": [
+     *     [lat1, lon1],
+     *     [lat2, lon2],
+     *     [lat3, lon3],
+     *     ...
+     *   ]
+     * }
+     */
+    @PostMapping("/zona")
+    public List<SitioTuristico> buscarEnZona(@RequestBody com.tbd.lab1tbd.Dto.ZonaBusquedaRequest zona) {
+        return service.getEnZona(zona.getPuntos());
+    }
 }

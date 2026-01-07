@@ -74,4 +74,17 @@ public class SitioTuristicoService {
 
         return repository.findCercanos(longitud, latitud, radioMetros);
     }
+
+    /**
+     * Busca sitios turísticos dentro de una zona definida por un polígono.
+     *
+     * @param puntos Lista de puntos [[lat, lon], [lat, lon], ...] que definen el polígono
+     * @return Lista de sitios turísticos dentro del polígono
+     */
+    public List<SitioTuristico> getEnZona(List<List<Double>> puntos) {
+        if (puntos == null || puntos.size() < 3) {
+            throw new IllegalArgumentException("Se requieren al menos 3 puntos para un polígono");
+        }
+        return repository.findEnZona(puntos);
+    }
 }
