@@ -41,6 +41,7 @@ public class EstadisticasRepository {
                 ST_MakePoint(:longitud, :latitud)::geography
             ) AS distancia
         FROM buscar_sitios_cercanos(:longitud, :latitud, :radio) s
+        ORDER BY distancia ASC
         """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
