@@ -48,7 +48,7 @@ CREATE TABLE sitios_turisticos (
     nombre VARCHAR(255) NOT NULL,
     descripcion TEXT,
     tipo VARCHAR(50),
-    coordenadas GEOGRAPHY(POINT, 4326),
+    ubicacion GEOGRAPHY(POINT, 4326),
     calificacion_promedio DECIMAL(3, 2) DEFAULT 0.0,
     total_reseñas INT DEFAULT 0
 );
