@@ -85,7 +85,7 @@ INSERT INTO usuarios (nombre, email, contrasena_hash, biografia, fecha_registro)
 
 ALTER TABLE sitios_turisticos ADD COLUMN IF NOT EXISTS ciudad VARCHAR(100);
 
-INSERT INTO sitios_turisticos (nombre, descripcion, tipo, coordenadas, ciudad) VALUES
+INSERT INTO sitios_turisticos (nombre, descripcion, tipo, ubicacion, ciudad) VALUES
 -- Parques
 ('Cerro San Cristobal', 'El gran parque urbano de Santiago, con vistas panoramicas.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6300, -33.4168), 4326), 'Santiago'),
 ('Parque Forestal', 'Hermoso parque lineal a lo largo del rio Mapocho.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6450, -33.4360), 4326), 'Santiago'),
@@ -267,32 +267,32 @@ INSERT INTO rutas_sugeridas (nombre, descripcion, id_usuario, camino) VALUES
 (
     'Ruta Histórica Santiago Centro',
     'Un recorrido caminando desde el Bellas Artes, pasando por la Plaza de Armas hasta La Moneda.',
-    5, -- Creada por Elena (Guía turística)
+    5,
     ST_GeomFromText('LINESTRING(
-        -70.6418 -33.4350,  -- Museo Bellas Artes
-        -70.6477 -33.4398,  -- Teatro Municipal
-        -70.6510 -33.4372,  -- Plaza de Armas
-        -70.6538 -33.4426   -- La Moneda
+        -70.6418 -33.4350,  
+        -70.6477 -33.4398,  
+        -70.6510 -33.4372,     
+        -70.6538 -33.4426     
     )', 4326)
 ),
 (
     'Circuito de Parques en Bici',
     'Ruta ideal para ciclistas conectando áreas verdes principales.',
-    8, -- Creada por Hector (Ciclista)
+    8, 
     ST_GeomFromText('LINESTRING(
-        -70.6300 -33.4168,  -- Cerro San Cristóbal
-        -70.6100 -33.4050,  -- Parque Bicentenario
-        -70.6450 -33.4360   -- Parque Forestal
+        -70.6300 -33.4168, 
+        -70.6100 -33.4050,  
+        -70.6450 -33.4360   
     )', 4326)
 ),
 (
     'Paseo Gastronómico Lastarria',
     'Breve recorrido por los mejores lugares para comer.',
-    2, -- Creada por Bruno (Amante de la gastronomía)
+    2, 
     ST_GeomFromText('LINESTRING(
-        -70.6353 -33.4385,  -- Bocanáriz
-        -70.6380 -33.4340,  -- Liguria
-        -70.6360 -33.4320   -- Peumayén
+        -70.6353 -33.4385,  
+        -70.6380 -33.4340,  
+        -70.6360 -33.4320   
     )', 4326)
 );
 

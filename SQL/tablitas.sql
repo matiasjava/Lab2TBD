@@ -192,7 +192,7 @@ CREATE INDEX idx_reseñas_id_usuario ON reseñas(id_usuario);
 CREATE INDEX idx_fotografias_id_sitio ON fotografias(id_sitio);
 CREATE INDEX idx_fotografias_id_usuario ON fotografias(id_usuario);
 CREATE INDEX idx_sitios_tipo ON sitios_turisticos(tipo);
-CREATE INDEX idx_sitios_coordenadas ON sitios_turisticos USING GIST (coordenadas);
+CREATE INDEX idx_sitios_ubicacion ON sitios_turisticos USING GIST (ubicacion);
 CREATE INDEX idx_rutas_camino ON rutas_sugeridas USING GIST (camino);
 
 -- -----------------------------------------------------
@@ -216,7 +216,7 @@ BEGIN
     SELECT *
     FROM sitios_turisticos
     WHERE ST_DWithin(
-            coordenadas,
+            ubicacion,
             ST_MakePoint(user_long, user_lat)::geography,
             radio_metros
         );
