@@ -1,8 +1,21 @@
 <template>
   <div class="site-card" @click="goToSite">
     <div class="site-image">
-      <img v-if="site.foto" :src="site.foto" :alt="site.nombre" />
-      <div v-else class="no-image">Sin imagen</div>
+      <div v-if="loading" class="loading-placeholder">
+        <span class="spinner">↻</span>
+      </div>
+
+      <img 
+        v-else-if="imagenUrl" 
+        :src="imagenUrl" 
+        :alt="site.nombre" 
+        @error="handleImageError"
+      />
+      
+      <div v-else class="no-image">
+        <span>Sin imagen</span>
+      </div>
+      
       <span class="site-type">{{ site.tipo }}</span>
     </div>
     
@@ -12,9 +25,8 @@
       
       <div class="site-footer">
         <RatingStars :rating="site.calificacionPromedio || 0" />
-        
         <span class="reviews-count">
-          {{ reviewsCount }} reseñas
+          {{ site.totalreseñas || 0 }} reseñas
         </span>
       </div>
     </div>
@@ -23,7 +35,9 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { computed } from 'vue'
+import { ref, onMounted } from 'vue'
+// IMPORTANTE: Ajusta la ruta según dónde guardaste el archivo que me mostraste
+import { photosService } from '@/services/photosService' 
 import RatingStars from './RatingStars.vue'
 
 const props = defineProps({
@@ -34,12 +48,39 @@ const props = defineProps({
 })
 
 const router = useRouter()
+const imagenUrl = ref(null)
+const loading = ref(true)
 
-// Lógica simplificada: apunta directo a la propiedad de Java 'totalreseñas'
-const reviewsCount = computed(() => {
-  return props.site.totalreseñas || 0
+// === Lógica de carga de imagen usando tu servicio ===
+const loadSiteImage = async () => {
+  try {
+    loading.value = true
+    
+    // Usamos tu servicio. Como devuelve response.data, recibimos el array directo.
+    const fotos = await photosService.getBySiteId(props.site.id)
+    
+    // Verificamos si llegó algo y tomamos la primera
+    if (fotos && Array.isArray(fotos) && fotos.length > 0) {
+      imagenUrl.value = fotos[0].url
+    }
+  } catch (error) {
+    console.error(`Error cargando foto para sitio ${props.site.id}:`, error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Ejecutamos la carga apenas aparece la tarjeta
+onMounted(() => {
+  loadSiteImage()
 })
 
+const handleImageError = () => {
+  // Si la URL falla (ej. 404), borramos la variable para que salga el placeholder
+  imagenUrl.value = null
+}
+
+// === Funciones auxiliares ===
 const truncateDescription = (text) => {
   if (!text) return ''
   return text.length > 100 ? text.substring(0, 100) + '...' : text
@@ -51,6 +92,7 @@ const goToSite = () => {
 </script>
 
 <style scoped>
+/* Estilos Base */
 .site-card {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -58,6 +100,8 @@ const goToSite = () => {
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
   background-color: white;
+  display: flex;
+  flex-direction: column;
 }
 
 .site-card:hover {
@@ -69,7 +113,7 @@ const goToSite = () => {
   position: relative;
   width: 100%;
   height: 200px;
-  overflow: hidden;
+  background-color: #f8f9fa;
 }
 
 .site-image img {
@@ -78,14 +122,27 @@ const goToSite = () => {
   object-fit: cover;
 }
 
-.no-image {
+/* Estilos para los estados "Sin Imagen" y "Cargando" */
+.no-image, .loading-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #ecf0f1;
   color: #7f8c8d;
+  font-weight: 500;
+  background-color: #ecf0f1;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  font-size: 1.5rem;
+  display: block;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .site-type {
@@ -97,10 +154,15 @@ const goToSite = () => {
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .site-content {
   padding: 1rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .site-name {
@@ -120,6 +182,7 @@ const goToSite = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: auto;
 }
 
 .reviews-count {

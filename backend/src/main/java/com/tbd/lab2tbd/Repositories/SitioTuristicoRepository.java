@@ -24,7 +24,7 @@ public class SitioTuristicoRepository {
     /**
      * RowMapper para convertir una fila de 'sitios_turisticos' a nuestro POJO.
      * Usa funciones de PostGIS (ST_Y para lat, ST_X para lon) para extraer
-     * las coordenadas del tipo 'geography'.
+     * la ubicacion del tipo 'geography'.
      */
     private static final RowMapper<SitioTuristico> MAPPER = new RowMapper<>() {
         @Override
@@ -45,8 +45,8 @@ public class SitioTuristicoRepository {
     // Columnas base para las consultas SELECT
     private static final String SELECT_COLUMNS =
         "id, nombre, descripcion, tipo, calificacion_promedio, total_reseñas, " +
-        "ST_Y(coordenadas::geometry) AS latitud, " +
-        "ST_X(coordenadas::geometry) AS longitud ";
+        "ST_Y(ubicacion::geometry) AS latitud, " +
+        "ST_X(ubicacion::geometry) AS longitud ";
 
     /**
      * Obtiene todos los sitios turísticos.
@@ -74,7 +74,7 @@ public class SitioTuristicoRepository {
      */
     public Long create(SitioTuristicoRequest sitio) {
         String sql = """
-                INSERT INTO sitios_turisticos (nombre, descripcion, tipo, coordenadas)
+                INSERT INTO sitios_turisticos (nombre, descripcion, tipo, ubicacion)
                 VALUES (:nombre, :descripcion, :tipo, ST_SetSRID(ST_MakePoint(:longitud, :latitud), 4326))
                 RETURNING id
                 """;
@@ -98,7 +98,7 @@ public class SitioTuristicoRepository {
                 SET nombre = :nombre,
                     descripcion = :descripcion,
                     tipo = :tipo,
-                    coordenadas = ST_SetSRID(ST_MakePoint(:longitud, :latitud), 4326)
+                    ubicacion = ST_SetSRID(ST_MakePoint(:longitud, :latitud), 4326)
                 WHERE id = :id
                 """;
 
@@ -163,11 +163,11 @@ public class SitioTuristicoRepository {
                     tipo,
                     calificacion_promedio,
                     total_reseñas,
-                    ST_Y(coordenadas::geometry) AS latitud,
-                    ST_X(coordenadas::geometry) AS longitud
+                    ST_Y(ubicacion::geometry) AS latitud,
+                    ST_X(ubicacion::geometry) AS longitud
                 FROM sitios_turisticos
                 WHERE ST_DWithin(
-                    coordenadas,
+                   ubicacion,
                     ST_MakePoint(:longitud, :latitud)::geography,
                     :radio
                 )
@@ -210,12 +210,12 @@ public class SitioTuristicoRepository {
         String sql = """
             SELECT
                 id, nombre, descripcion, tipo, calificacion_promedio, total_reseñas,
-                ST_Y(coordenadas::geometry) AS latitud,
-                ST_X(coordenadas::geometry) AS longitud
+                ST_Y(ubicacion::geometry) AS latitud,
+                ST_X(ubicacion::geometry) AS longitud
             FROM sitios_turisticos
             WHERE ST_Covers(
                 ST_GeomFromText(:wkt, 4326),
-                coordenadas::geometry
+               ubicacion::geometry
             )
         """;
 

@@ -99,8 +99,8 @@ public class ListaRepository {
     public List<SitioTuristico> getSitiosByListaId(Long idLista) {
         String sql = "SELECT s.id, s.nombre, s.descripcion, s.tipo, " +
                      "s.calificacion_promedio, s.total_reseñas, " +
-                     "ST_Y(s.coordenadas::geometry) AS latitud, " +
-                     "ST_X(s.coordenadas::geometry) AS longitud " +
+                     "ST_Y(s.ubicacion::geometry) AS latitud, " +
+                     "ST_X(s.ubicacion::geometry) AS longitud " +
                      "FROM sitios_turisticos s " +
                      "JOIN lista_sitios ls ON s.id = ls.id_sitio " +
                      "WHERE ls.id_lista = :idLista";

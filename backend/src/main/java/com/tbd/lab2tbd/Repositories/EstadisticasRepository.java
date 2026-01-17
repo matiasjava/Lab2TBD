@@ -83,11 +83,11 @@ public class EstadisticasRepository {
                 SELECT
                     t.nombre AS nombre_teatro,
                     r.nombre AS nombre_restaurante,
-                    ST_Distance(t.coordenadas, r.coordenadas) AS distancia_en_metros
+                    ST_Distance(t.ubicacion, r.ubicacion) AS distancia_en_metros
                 FROM
                     sitios_turisticos t
                 JOIN
-                    sitios_turisticos r ON ST_DWithin(t.coordenadas, r.coordenadas, 100)
+                    sitios_turisticos r ON ST_DWithin(t.ubicacion, r.ubicacion, 100)
                 WHERE
                     t.tipo = 'Teatro'
                     AND r.tipo = 'Restaurante'
