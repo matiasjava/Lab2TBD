@@ -7,50 +7,97 @@
       <p class="subtitle">Consultas SQL del Enunciado del Laboratorio</p>
     </div>
 
-    <!-- Botón de recarga global -->
     <div class="reload-section">
       <button @click="loadAllStatistics" :disabled="loading" class="btn-reload">
-        <span v-if="!loading">🔄 Recargar Todas las Estadísticas</span>
+        <span v-if="!loading">🔄 Recargar Estadísticas Generales</span>
         <span v-else>⏳ Cargando...</span>
       </button>
     </div>
 
     <ErrorMessage v-if="error" :message="error" @close="error = null" />
 
-    <!-- Grid de Estadísticas -->
     <div class="stats-grid">
 
-      <!-- Consulta #1: Estadísticas por Tipo -->
-      <div class="stat-card">
-        <h2>📈 Consulta #1: Estadísticas por Tipo</h2>
-        <p class="description">Calificación promedio y total de reseñas por tipo de sitio</p>
+      <div class="stat-card full-width">
+        <h2>🗺️ Consulta #1: Sitios Cercanos</h2>
+        <p class="description">
+          Usa tu ubicación o haz clic en el mapa para buscar sitios en un radio de 5km.
+        </p>
 
-        <div v-if="statsByType.length > 0" class="data-table">
+        <div class="map-wrapper mb-3">
+           <l-map 
+             v-if="mapReady"
+             v-model:zoom="zoom" 
+             :center="center" 
+             :use-global-leaflet="false" 
+             @click="onMapClick"
+             class="map-container"
+           >
+             <l-tile-layer
+               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+               layer-type="base"
+               name="OpenStreetMap"
+             ></l-tile-layer>
+             
+             <l-marker 
+               v-if="searchParams.latitud && searchParams.longitud" 
+               :lat-lng="[searchParams.latitud, searchParams.longitud]"
+             >
+               <l-tooltip>Centro de Búsqueda</l-tooltip>
+             </l-marker>
+           </l-map>
+           <div v-else class="loading-map">Cargando mapa...</div>
+        </div>
+
+        <div class="selected-coords mb-3" v-if="searchParams.latitud">
+           <span>📍 Coordenadas: <strong>{{ searchParams.latitud.toFixed(4) }}, {{ searchParams.longitud.toFixed(4) }}</strong></span>
+        </div>
+
+        <div class="form-actions-inline">
+          <button @click="searchNearbySites" :disabled="nearbyLoading || !isFormValid" class="btn-search">
+            <span v-if="!nearbyLoading">🔍 Buscar en este punto</span>
+            <span v-else>⏳ Buscando...</span>
+          </button>
+          
+          <button @click="useCurrentLocation" :disabled="nearbyLoading || gettingLocation" class="btn-location">
+            <span v-if="!gettingLocation">🎯 Mi Ubicación actual</span>
+            <span v-else>📡 Obteniendo y buscando...</span>
+          </button>
+        </div>
+
+        <div v-if="nearbySites.length > 0" class="data-table mt-4">
           <table>
             <thead>
               <tr>
-                <th>Tipo</th>
-                <th>Cal. Promedio</th>
-                <th>Total Reseñas</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Coordenadas</th>
+                <th>Distancia</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="stat in statsByType" :key="stat.tipo">
-                <td class="type-cell">{{ stat.tipo }}</td>
-                <td class="rating-cell">{{ stat.calificacionPromedioGeneral?.toFixed(2) || 'N/A' }} ⭐</td>
-                <td class="count-cell">{{ stat.totalreseñasGeneral || 0 }}</td>
+              <tr v-for="item in nearbySites" :key="item.sitio.id">
+                <td class="name-cell">{{ item.sitio.nombre }}</td>
+                <td class="desc-cell" :title="item.sitio.descripcion">
+                  {{ item.sitio.descripcion || 'Sin descripción' }}
+                </td>
+                <td class="coords-cell">
+                  {{ item.sitio.latitud?.toFixed(4) }}, {{ item.sitio.longitud?.toFixed(4) }}
+                </td>
+                <td class="distance-cell">
+                  {{ formatDistance(item.distanciaEnMetros) }}
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <p v-else class="no-data">No hay datos disponibles</p>
+        
+        <p v-else-if="searched && nearbySites.length === 0" class="no-data">
+          No se encontraron sitios turísticos a 5km de este punto.
+        </p>
       </div>
-
-      <!-- Consulta #2: Top Reseñadores -->
       <div class="stat-card">
         <h2>👑 Consulta #2: Top Reseñadores</h2>
-        <p class="description">5 usuarios más activos (últimos 6 meses)</p>
-
         <div v-if="topReviewers.length > 0" class="leaderboard">
           <div v-for="(reviewer, index) in topReviewers" :key="index" class="leaderboard-item">
             <span class="rank">{{ index + 1 }}°</span>
@@ -58,14 +105,11 @@
             <span class="count">{{ reviewer.conteoreseñas }} reseñas</span>
           </div>
         </div>
-        <p v-else class="no-data">No hay reseñadores activos en los últimos 6 meses</p>
+        <p v-else class="no-data">No hay reseñadores activos</p>
       </div>
 
-      <!-- Consulta #3: Análisis de Proximidad -->
       <div class="stat-card full-width">
         <h2>📍 Consulta #3: Análisis de Proximidad</h2>
-        <p class="description">Restaurantes a menos de 100 metros de Teatros</p>
-
         <div v-if="proximityAnalysis.length > 0" class="data-table">
           <table>
             <thead>
@@ -87,134 +131,23 @@
         <p v-else class="no-data">No hay restaurantes cerca de teatros</p>
       </div>
 
-      <!-- Consulta #4: Valoraciones Inusuales -->
       <div class="stat-card">
-        <h2>⚠️ Consulta #4: Valoraciones Inusuales</h2>
-        <p class="description">Sitios con alta calificación (>4.5) pero pocas reseñas (menor a 10)</p>
-
+        <h2>⚠️ Consulta: Valoraciones Inusuales</h2>
         <div v-if="unusualRatings.length > 0" class="site-list">
-          
-          <div 
-            v-for="site in (showAllUnusual ? unusualRatings : unusualRatings.slice(0, 5))" 
-            :key="site.nombre" 
-            class="site-item"
-          >
+          <div v-for="site in (showAllUnusual ? unusualRatings : unusualRatings.slice(0, 5))" :key="site.nombre" class="site-item">
             <div class="site-name">{{ site.nombre }}</div>
             <div class="site-stats">
               <span class="rating">⭐ {{ site.calificacionPromedio?.toFixed(1) }}</span>
               <span class="count">{{ site.totalreseñas }} reseñas</span>
             </div>
           </div>
-
           <div v-if="unusualRatings.length > 5" class="toggle-container">
             <button @click="showAllUnusual = !showAllUnusual" class="btn-toggle">
               {{ showAllUnusual ? '▲ Ver menos' : '▼ Ver todos (' + unusualRatings.length + ')' }}
             </button>
           </div>
-
         </div>
         <p v-else class="no-data">No hay sitios con estas características</p>
-      </div>
-
-      <!-- Consulta #5: Análisis de Popularidad por Región -->
-      <div class="stat-card">
-        <h2>🌍 Consulta #5: Popularidad por Región</h2>
-        <p class="description">Total de reseñas agrupadas por ciudad</p>
-
-        <div v-if="popularityByRegion.length > 0" class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Región/Ciudad</th>
-                <th>Total Reseñas</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(stat, index) in popularityByRegion" :key="index">
-                <td class="name-cell">{{ stat.region }}</td>
-                <td class="count-cell">{{ stat.totalResenas }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p v-else class="no-data">No hay datos por región</p>
-      </div>
-
-      <!-- Consulta #7: Pocas Contribuciones -->
-      <div class="stat-card">
-        <h2>💤 Consulta #7: Sitios con Pocas Contribuciones</h2>
-        <p class="description">Sin actividad (reseñas/fotos) en los últimos 3 meses</p>
-
-        <div v-if="lowContribution.length > 0" class="site-list">
-          <div v-for="site in lowContribution.slice(0, 10)" :key="site.nombre" class="site-item">
-            <div class="site-name">{{ site.nombre }}</div>
-            <div class="site-stats">
-              <span class="type">{{ site.tipo }}</span>
-              <span class="date">
-                {{ site.fechaUltimaContribucion ? formatDate(site.fechaUltimaContribucion) : 'Sin actividad' }}
-              </span>
-            </div>
-          </div>
-          <p v-if="lowContribution.length > 10" class="more-items">
-            + {{ lowContribution.length - 10 }} sitios más
-          </p>
-        </div>
-        <p v-else class="no-data">Todos los sitios tienen actividad reciente</p>
-      </div>
-
-      <!-- Consulta #8: Reseñas Más Largas -->
-      <div class="stat-card full-width">
-        <h2>📝 Consulta #8: Reseñas Más Largas</h2>
-        <p class="description">Top 3 reseñas más extensas de usuarios con promedio >4.0</p>
-
-        <div v-if="longestReviews.length > 0" class="reviews-list">
-          <div v-for="(review, index) in longestReviews" :key="index" class="review-card">
-            <div class="review-header">
-              <span class="rank">{{ index + 1 }}</span>
-              <span class="author">{{ review.nombreUsuario }}</span>
-              <span class="site">→ {{ review.nombreSitio }}</span>
-              <span class="length">{{ review.longitudResena }} caracteres</span>
-            </div>
-            <div class="review-content">
-              "{{ review.contenido }}"
-            </div>
-          </div>
-        </div>
-        <p v-else class="no-data">No hay reseñas disponibles</p>
-      </div>
-
-  
-
-      <!-- Consulta #9: Resumen de Contribuciones -->
-      <div class="stat-card full-width">
-        <h2>🏆 Consulta #9: Resumen de Contribuciones</h2>
-        <p class="description">Vista materializada: Total de contribuciones por usuario</p>
-
-        <div v-if="contributionsSummary.length > 0" class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Usuario</th>
-                <th>Reseñas</th>
-                <th>Fotos</th>
-                <th>Listas</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="user in contributionsSummary" :key="user.idUsuario">
-                <td class="name-cell">{{ user.nombre }}</td>
-                <td class="count-cell">{{ user.totalreseñas || 0 }}</td>
-                <td class="count-cell">{{ user.totalFotos || 0 }}</td>
-                <td class="count-cell">{{ user.totalListas || 0 }}</td>
-                <td class="total-cell">
-                  {{ (user.totalreseñas || 0) + (user.totalFotos || 0) + (user.totalListas || 0) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p v-else class="no-data">No hay usuarios con contribuciones</p>
       </div>
 
     </div>
@@ -222,427 +155,244 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { statisticsService } from '@/services/statisticsService'
 import Navbar from '@/components/layout/Navbar.vue'
 import ErrorMessage from '@/components/common/ErrorMessage.vue'
 
+// Importaciones de Leaflet
+import { LMap, LTileLayer, LMarker, LTooltip } from '@vue-leaflet/vue-leaflet'
+import 'leaflet/dist/leaflet.css'
 
-
-const statsByType = ref([])
+// --- ESTADO GLOBAL ---
 const topReviewers = ref([])
 const proximityAnalysis = ref([])
 const unusualRatings = ref([])
-const lowContribution = ref([])
-const longestReviews = ref([])
-const contributionsSummary = ref([])
-const popularityByRegion = ref([])
-
 const showAllUnusual = ref(false)
-
 const loading = ref(false)
 const error = ref(null)
 
+// --- ESTADO CONSULTA 1 (MAPA + BÚSQUEDA) ---
+const searchParams = ref({
+  latitud: null,
+  longitud: null,
+  radio: 5000 // Fijo 5km
+})
+const nearbySites = ref([])
+const nearbyLoading = ref(false)
+const searched = ref(false)
+const gettingLocation = ref(false)
+
+// Configuración del Mapa
+const zoom = ref(12)
+const center = ref([-33.4489, -70.6693]) // Santiago Centro por defecto
+const mapReady = ref(false)
+
+// Validación
+const isFormValid = computed(() => {
+  return searchParams.value.latitud !== null && searchParams.value.longitud !== null
+})
+
+// --- MÉTODOS CONSULTA 1 ---
+
+const formatDistance = (metros) => {
+  if (!metros && metros !== 0) return '0m'
+  if (metros < 1000) {
+    return `${Number(metros).toFixed(0)}m`
+  }
+  return `${(Number(metros) / 1000).toFixed(2)}km`
+}
+
+// 1. EVENTO CLICK EN MAPA 
+const onMapClick = (e) => {
+  searchParams.value.latitud = e.latlng.lat
+  searchParams.value.longitud = e.latlng.lng
+  
+}
+
+// 2. FUNCIÓN DE BÚSQUEDA 
+const searchNearbySites = async () => {
+  if (!isFormValid.value) return
+  
+  nearbyLoading.value = true
+  searched.value = true
+  
+  try {
+    const data = await statisticsService.getNearbySites(
+      searchParams.value.longitud,
+      searchParams.value.latitud,
+      searchParams.value.radio
+    )
+    nearbySites.value = data
+  } catch (err) {
+    error.value = "Error al buscar sitios cercanos"
+    console.error(err)
+  } finally {
+    nearbyLoading.value = false
+  }
+}
+
+// 3. USAR MI UBICACIÓN 
+const useCurrentLocation = () => {
+  if (!navigator.geolocation) {
+    error.value = 'Navegador no soporta geolocalización'
+    return
+  }
+  
+  gettingLocation.value = true
+  
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      // A. Actualizamos coordenadas
+      searchParams.value.latitud = pos.coords.latitude
+      searchParams.value.longitud = pos.coords.longitude
+      gettingLocation.value = false
+      await searchNearbySites()
+    },
+    (err) => {
+      console.error(err)
+      error.value = "No se pudo obtener la ubicación GPS"
+      gettingLocation.value = false
+    }
+  )
+}
+
+
+// --- CARGA GENERAL DE ESTADÍSTICAS ---
 const loadAllStatistics = async () => {
   loading.value = true
-  error.value = null
-
   try {
     const results = await Promise.allSettled([
-      statisticsService.getStatsByType(),
       statisticsService.getTopReviewers(),
       statisticsService.getProximityAnalysis(),
-      statisticsService.getUnusualRatings(),
-      statisticsService.getLowContributionSites(),
-      statisticsService.getLongestReviews(),
-      statisticsService.getContributionsSummary(),
-      statisticsService.getPopularityByRegion()
+      statisticsService.getUnusualRatings()
     ])
-
-    statsByType.value = results[0].status === 'fulfilled' ? results[0].value : []
-    topReviewers.value = results[1].status === 'fulfilled' ? results[1].value : []
-    proximityAnalysis.value = results[2].status === 'fulfilled' ? results[2].value : []
-    unusualRatings.value = results[3].status === 'fulfilled' ? results[3].value : []
-    lowContribution.value = results[4].status === 'fulfilled' ? results[4].value : []
-    longestReviews.value = results[5].status === 'fulfilled' ? results[5].value : []
-    contributionsSummary.value = results[6].status === 'fulfilled' ? results[6].value : []
-    popularityByRegion.value = results[7].status === 'fulfilled' ? results[7].value : []
-
-    const failedRequests = results.filter(r => r.status === 'rejected')
-    if (failedRequests.length > 0) {
-      console.error('Errores en algunas consultas:', failedRequests)
-    }
+    
+    if (results[0].status === 'fulfilled') topReviewers.value = results[0].value
+    if (results[1].status === 'fulfilled') proximityAnalysis.value = results[1].value
+    if (results[2].status === 'fulfilled') unusualRatings.value = results[2].value
 
   } catch (err) {
-    error.value = 'Error al cargar las estadísticas'
-    console.error('Error:', err)
+    error.value = 'Error al cargar estadísticas generales'
   } finally {
     loading.value = false
   }
 }
 
-const formatDate = (dateString) => {
-  if (!dateString) return 'Nunca'
-  const date = new Date(dateString)
-  return date.toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
-}
-
 onMounted(() => {
   loadAllStatistics()
+  setTimeout(() => { mapReady.value = true }, 200)
 })
 </script>
 
 <style scoped>
-
-.toggle-container {
-  text-align: center;
-  margin-top: 1rem;
-  padding-top: 0.5rem;
-  border-top: 1px dashed #ecf0f1;
-}
-
-.btn-toggle {
-  background: none;
+/* --- ESTILOS MAPA --- */
+.map-wrapper {
+  height: 400px;
+  width: 100%;
   border: 1px solid #bdc3c7;
-  color: #7f8c8d;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
-.btn-toggle:hover {
+.map-container {
+  height: 100%;
+  width: 100%;
+}
+
+.loading-map {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #ecf0f1;
-  color: #2c3e50;
-  border-color: #95a5a6;
-}
-
-.statistics-view {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-  padding-bottom: 3rem;
-}
-
-.statistics-view > .header,
-.statistics-view > .reload-section,
-.statistics-view > .stats-grid {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.header h1 {
-  font-size: 2.5rem;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-}
-
-.subtitle {
   color: #7f8c8d;
-  font-size: 1.1rem;
 }
 
-.reload-section {
-  text-align: center;
-  margin-bottom: 2rem;
+.selected-coords {
+  background: #e8f6f3;
+  color: #16a085;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #a3e4d7;
+  display: inline-block;
+  font-size: 0.9rem;
 }
 
-.btn-reload {
-  padding: 1rem 2rem;
+.mb-3 { margin-bottom: 1rem; }
+
+/* --- ESTILOS BOTONES --- */
+.form-actions-inline {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-search {
   background: #3498db;
   color: white;
+  flex: 2;
+  padding: 0.8rem;
   border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  border-radius: 6px;
+  font-weight: bold;
   cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+  transition: background 0.2s;
+  font-size: 1rem;
 }
+.btn-search:hover:not(:disabled) { background: #2980b9; }
 
-.btn-reload:hover:not(:disabled) {
-  background: #2980b9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+.btn-location {
+  background: #f1c40f; 
+  color: #2c3e50;
+  flex: 1;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
 }
+.btn-location:hover:not(:disabled) { background: #d4ac0d; }
 
-.btn-reload:disabled {
+button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 1.5rem;
-}
+/* --- LAYOUT GENERAL --- */
+.statistics-view { min-height: 100vh; background-color: #f8f9fa; padding-bottom: 3rem; }
+.header, .reload-section, .stats-grid { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+.header { text-align: center; margin-bottom: 2rem; padding-top: 2rem; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 1.5rem; }
+.stat-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.stat-card.full-width { grid-column: 1 / -1; }
 
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.stat-card.full-width {
-  grid-column: 1 / -1;
-}
-
-.stat-card h2 {
-  color: #2c3e50;
-  font-size: 1.3rem;
-  margin-bottom: 0.5rem;
-}
-
-.description {
-  color: #7f8c8d;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
-.no-data {
-  text-align: center;
-  color: #95a5a6;
-  padding: 2rem;
-  font-style: italic;
-}
-
-/* Tables */
-.data-table {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  background: #ecf0f1;
-  padding: 0.75rem;
-  text-align: left;
-  font-weight: 600;
-  color: #2c3e50;
-  border-bottom: 2px solid #bdc3c7;
-}
-
-td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #ecf0f1;
-}
-
-.type-cell {
-  font-weight: 600;
-  color: #3498db;
-}
-
-.rating-cell {
-  color: #f39c12;
-  font-weight: 600;
-}
-
-.count-cell {
-  text-align: center;
-  font-weight: 600;
-}
-
-.distance-cell {
-  text-align: right;
-  color: #27ae60;
-  font-weight: 600;
-}
-
-.name-cell {
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.total-cell {
-  text-align: center;
-  font-weight: 700;
-  color: #e74c3c;
-  font-size: 1.1rem;
-}
+/* Tablas */
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 0.75rem; border-bottom: 1px solid #ecf0f1; text-align: left; }
+th { background: #ecf0f1; font-weight: 600; color: #2c3e50; }
+.distance-cell { text-align: right; color: #27ae60; font-weight: 600; }
+.no-data { text-align: center; color: #bdc3c7; padding: 2rem; font-style: italic; }
 
 /* Leaderboard */
-.leaderboard {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
+.leaderboard { display: flex; flex-direction: column; gap: 0.75rem; }
+.leaderboard-item { display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: #ecf0f1; border-radius: 8px; }
+.rank { font-size: 1.2rem; font-weight: 700; color: #3498db; }
+.name { flex: 1; font-weight: 600; color: #2c3e50; }
 
-.leaderboard-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.75rem;
-  background: #ecf0f1;
-  border-radius: 8px;
-  transition: all 0.3s;
-}
+/* Lista de sitios */
+.site-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.site-item { padding: 0.75rem; border-left: 4px solid #e74c3c; background: #f8f9fa; border-radius: 4px; }
+.site-name { font-weight: 600; color: #2c3e50; }
+.site-stats { font-size: 0.9rem; color: #7f8c8d; }
 
-.leaderboard-item:hover {
-  background: #d5dbdb;
-  transform: translateX(5px);
-}
-
-.rank {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #3498db;
-  min-width: 40px;
-}
-
-.name {
-  flex: 1;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.count {
-  color: #7f8c8d;
-  font-weight: 600;
-}
-
-/* Site List */
-.site-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.site-item {
-  padding: 0.75rem;
-  border-left: 4px solid #3498db;
-  background: #f8f9fa;
-  border-radius: 4px;
-}
-
-.site-name {
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 0.25rem;
-}
-
-.site-stats {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.9rem;
-  color: #7f8c8d;
-}
-
-.rating {
-  color: #f39c12;
-  font-weight: 600;
-}
-
-.type {
-  color: #3498db;
-  font-weight: 600;
-}
-
-.date {
-  color: #95a5a6;
-}
-
-.more-items {
-  text-align: center;
-  color: #7f8c8d;
-  font-style: italic;
-  margin-top: 0.5rem;
-}
-
-/* Reviews */
-.reviews-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.review-card {
-  border: 1px solid #ecf0f1;
-  border-radius: 8px;
-  padding: 1rem;
-  background: #f8f9fa;
-}
-
-.review-header {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.review-header .rank {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #e74c3c;
-  min-width: auto;
-}
-
-.author {
-  font-weight: 600;
-  color: #3498db;
-}
-
-.site {
-  color: #7f8c8d;
-}
-
-.length {
-  margin-left: auto;
-  color: #27ae60;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.review-content {
-  color: #34495e;
-  line-height: 1.6;
-  font-style: italic;
-  padding-left: 1rem;
-  border-left: 3px solid #3498db;
-  
-  
-  overflow-wrap: break-word;
-}
+.toggle-container { text-align: center; margin-top: 1rem; }
+.btn-toggle { background: none; border: 1px solid #bdc3c7; padding: 0.3rem 1rem; border-radius: 20px; cursor: pointer; }
 
 @media (max-width: 768px) {
-  .statistics-view {
-    padding: 1rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-card.full-width {
-    grid-column: 1;
-  }
-
-  .header h1 {
-    font-size: 2rem;
-  }
-
-  .review-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .length {
-    margin-left: 0;
-  }
+  .stats-grid { grid-template-columns: 1fr; }
+  .form-actions-inline { flex-direction: column; }
 }
 </style>

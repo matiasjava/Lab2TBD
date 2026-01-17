@@ -48,6 +48,7 @@ public class SitioTuristicoService {
         return repository.findByTipo(tipo);
     }
 
+
     /**
      * Busca sitios turísticos cercanos a una ubicación.
      *

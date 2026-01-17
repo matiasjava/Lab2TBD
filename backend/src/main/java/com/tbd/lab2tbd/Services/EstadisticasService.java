@@ -48,4 +48,9 @@ public class EstadisticasService {
     public List<EstadisticasPorRegionResponse> obtenerPopularidadPorRegion() {
         return repository.obtenerPopularidadPorRegion();
     }
+
+    public List<SitioCercanoResponse> obtenerSitiosCercanos(Double longitud, Double latitud) {
+        Integer radio = 5000;
+        return repository.findCercanos(longitud, latitud, radio);
+    }
 }

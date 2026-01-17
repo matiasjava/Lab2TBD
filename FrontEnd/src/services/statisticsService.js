@@ -42,4 +42,15 @@ export const statisticsService = {
     const response = await api.get('/estadisticas/popularidad-region')
     return response.data
   },
+
+  async getNearbySites(longitud, latitud, radio) {
+    const response = await api.get('/estadisticas/cercanos', {
+      params: {
+        longitud: longitud,
+        latitud: latitud,
+        radio: radio
+      }
+    })
+    return response.data
+  },
 }

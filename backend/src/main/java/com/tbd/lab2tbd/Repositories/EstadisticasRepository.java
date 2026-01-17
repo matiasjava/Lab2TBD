@@ -1,7 +1,9 @@
 package com.tbd.lab2tbd.Repositories;
 
 import com.tbd.lab2tbd.Dto.*;
+import com.tbd.lab2tbd.Entities.SitioTuristico;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -9,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Repository para ejecutar las consultas SQL del enunciado.
+ * Repository para ejecutar las consultas SQL del enunciado del lab 1 y 2.
  * Cada método corresponde a una consulta específica.
  */
 @Repository
@@ -17,6 +19,84 @@ import java.util.List;
 public class EstadisticasRepository {
 
     private final NamedParameterJdbcTemplate jdbc;
+
+    /**
+     * Consulta #1: Procedimiento que reciba las coordenadas del usuario y devuelva los sitios
+     *              turísticos en un radio de 5km ordenados por distancia (ST_Distance)
+     */
+
+    public List<SitioCercanoResponse> findCercanos(Double longitud, Double latitud, Integer radioMetros) {
+        String sql = """
+        SELECT
+            s.id,
+            s.nombre,
+            s.descripcion,
+            s.tipo,
+            s.calificacion_promedio,
+            s.total_reseñas,
+            ST_Y(s.ubicacion::geometry) AS latitud,
+            ST_X(s.ubicacion::geometry) AS longitud,
+            ST_Distance(
+                s.ubicacion, 
+                ST_MakePoint(:longitud, :latitud)::geography
+            ) AS distancia
+        FROM buscar_sitios_cercanos(:longitud, :latitud, :radio) s
+        """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("longitud", longitud)
+                .addValue("latitud", latitud)
+                .addValue("radio", radioMetros);
+
+        return jdbc.query(sql, params, (rs, rowNum) -> {
+            // 1. Mapeo del objeto interno
+            SitioTuristico sitio = new SitioTuristico();
+            sitio.setId(rs.getLong("id"));
+            sitio.setNombre(rs.getString("nombre"));
+            sitio.setDescripcion(rs.getString("descripcion"));
+            sitio.setTipo(rs.getString("tipo"));
+            sitio.setLatitud(rs.getDouble("latitud"));
+            sitio.setLongitud(rs.getDouble("longitud"));
+            sitio.setCalificacionPromedio(rs.getDouble("calificacion_promedio"));
+            sitio.setTotalreseñas(rs.getInt("total_reseñas"));
+
+            // 2. Mapeo del DTO respuesta
+            SitioCercanoResponse response = new SitioCercanoResponse();
+            response.setSitio(sitio);
+            response.setDistanciaEnMetros(rs.getDouble("distancia"));
+
+            return response;
+        });
+    }
+
+
+    /**
+     * Consulta #3: Análisis de Proximidad (Restaurantes a < 100m de un Teatro)
+     */
+    public List<ProximidadSitiosResponse> obtenerAnalisisProximidad() {
+        String sql = """
+                SELECT
+                    t.nombre AS nombre_teatro,
+                    r.nombre AS nombre_restaurante,
+                    ST_Distance(t.ubicacion, r.ubicacion) AS distancia_en_metros
+                FROM
+                    sitios_turisticos t
+                JOIN
+                    sitios_turisticos r ON ST_DWithin(t.ubicacion, r.ubicacion, 100)
+                WHERE
+                    t.tipo = 'Teatro'
+                    AND r.tipo = 'Restaurante'
+                    AND t.id != r.id
+                ORDER BY distancia_en_metros ASC
+                """;
+
+        return jdbc.query(sql, (rs, rowNum) -> new ProximidadSitiosResponse(
+                rs.getString("nombre_teatro"),
+                rs.getString("nombre_restaurante"),
+                rs.getDouble("distancia_en_metros")
+        ));
+    }
+
 
     /**
      * Consulta #1: Cálculo de Calificación Promedio y Conteo de Reseñas por tipo
@@ -72,33 +152,6 @@ public class EstadisticasRepository {
         return jdbc.query(sql, (rs, rowNum) -> new TopResenadorResponse(
                 rs.getString("nombre_usuario"),
                 rs.getInt("conteo_reseñas")
-        ));
-    }
-
-    /**
-     * Consulta #3: Análisis de Proximidad (Restaurantes a < 100m de un Teatro)
-     */
-    public List<ProximidadSitiosResponse> obtenerAnalisisProximidad() {
-        String sql = """
-                SELECT
-                    t.nombre AS nombre_teatro,
-                    r.nombre AS nombre_restaurante,
-                    ST_Distance(t.ubicacion, r.ubicacion) AS distancia_en_metros
-                FROM
-                    sitios_turisticos t
-                JOIN
-                    sitios_turisticos r ON ST_DWithin(t.ubicacion, r.ubicacion, 100)
-                WHERE
-                    t.tipo = 'Teatro'
-                    AND r.tipo = 'Restaurante'
-                    AND t.id != r.id
-                ORDER BY distancia_en_metros ASC
-                """;
-
-        return jdbc.query(sql, (rs, rowNum) -> new ProximidadSitiosResponse(
-                rs.getString("nombre_teatro"),
-                rs.getString("nombre_restaurante"),
-                rs.getDouble("distancia_en_metros")
         ));
     }
 

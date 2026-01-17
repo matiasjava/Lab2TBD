@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,6 +21,33 @@ import java.util.List;
 public class EstadisticasController {
 
     private final EstadisticasService service;
+
+    /**
+     * Consulta #1: Procedimiento que reciba las coordenadas del usuario y devuelva los sitios
+     *              turísticos en un radio de 5km ordenados por distancia (ST_Distance)
+     */
+    @GetMapping("/cercanos")
+    public ResponseEntity<List<SitioCercanoResponse>> getSitiosCercanos(
+            @RequestParam Double longitud,
+            @RequestParam Double latitud) {
+        List<SitioCercanoResponse> respuesta = service.obtenerSitiosCercanos(longitud, latitud);
+
+        return ResponseEntity.ok(respuesta);
+    }
+
+    /**
+     * Consulta #3: Análisis de proximidad (Restaurantes cerca de Teatros).
+     */
+    @GetMapping("/proximidad")
+    public ResponseEntity<List<ProximidadSitiosResponse>> obtenerAnalisisProximidad() {
+        return ResponseEntity.ok(service.obtenerAnalisisProximidad());
+    }
+
+
+
+
+    // ------------------ CONSULTAS LAB 1 --------------------------------------
+
 
     /**
      * GET /api/estadisticas/por-tipo
@@ -37,15 +65,6 @@ public class EstadisticasController {
     @GetMapping("/top-reseñadores")
     public ResponseEntity<List<TopResenadorResponse>> obtenerTopResenadores() {
         return ResponseEntity.ok(service.obtenerTopResenadores());
-    }
-
-    /**
-     * GET /api/estadisticas/proximidad
-     * Consulta #3: Análisis de proximidad (Restaurantes cerca de Teatros).
-     */
-    @GetMapping("/proximidad")
-    public ResponseEntity<List<ProximidadSitiosResponse>> obtenerAnalisisProximidad() {
-        return ResponseEntity.ok(service.obtenerAnalisisProximidad());
     }
 
     /**

@@ -219,6 +219,10 @@ BEGIN
             ubicacion,
             ST_MakePoint(user_long, user_lat)::geography,
             radio_metros
-        );
+        )
+    ORDER BY ST_Distance(
+            ubicacion,
+            ST_MakePoint(user_long, user_lat)::geography
+        ) ASC;
 END;
 $$ LANGUAGE plpgsql;
