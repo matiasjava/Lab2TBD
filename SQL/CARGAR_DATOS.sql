@@ -87,45 +87,45 @@ ALTER TABLE sitios_turisticos ADD COLUMN IF NOT EXISTS ciudad VARCHAR(100);
 
 INSERT INTO sitios_turisticos (nombre, descripcion, tipo, ubicacion, ciudad) VALUES
 -- Parques
-('Cerro San Cristobal', 'El gran parque urbano de Santiago, con vistas panoramicas.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6300, -33.4168), 4326), 'Santiago'),
-('Parque Forestal', 'Hermoso parque lineal a lo largo del rio Mapocho.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6450, -33.4360), 4326), 'Santiago'),
-('Parque Bicentenario', 'Moderno parque con lagunas artificiales y esculturas.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6100, -33.4050), 4326), 'Santiago'),
-('Parque Quinta Normal', 'Amplio parque con museos, lagunas y areas verdes.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6820, -33.4440), 4326), 'Santiago'),
+('Cerro San Cristobal', 'El gran parque urbano de Santiago, con vistas panoramicas.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6311, -33.4197), 4326), 'Santiago'),
+('Parque Forestal', 'Hermoso parque lineal a lo largo del rio Mapocho.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6412, -33.4355), 4326), 'Santiago'),
+('Parque Bicentenario', 'Moderno parque con lagunas artificiales y esculturas.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6034, -33.3933), 4326), 'Santiago'),
+('Parque Quinta Normal', 'Amplio parque con museos, lagunas y areas verdes.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6828, -33.4409), 4326), 'Santiago'),
 
 -- Museos
-('Museo Nacional de Bellas Artes', 'Principal museo de arte de Chile.', 'Museo', ST_SetSRID(ST_MakePoint(-70.6418, -33.4350), 4326), 'Santiago'),
-('Museo de la Memoria y los DDHH', 'Museo dedicado a la memoria historica.', 'Museo', ST_SetSRID(ST_MakePoint(-70.6820, -33.4450), 4326), 'Santiago'),
-('Museo Chileno de Arte Precolombino', 'Coleccion de arte de culturas precolombinas.', 'Museo', ST_SetSRID(ST_MakePoint(-70.6500, -33.4380), 4326), 'Santiago'),
-('Centro Cultural La Moneda', 'Centro cultural subterraneo con exposiciones.', 'Museo', ST_SetSRID(ST_MakePoint(-70.6530, -33.4430), 4326), 'Santiago'),
+('Museo Nacional de Bellas Artes', 'Principal museo de arte de Chile.', 'Museo', ST_SetSRID(ST_MakePoint(-70.6435, -33.4351), 4326), 'Santiago'),
+('Museo de la Memoria y los DDHH', 'Museo dedicado a la memoria historica.', 'Museo', ST_SetSRID(ST_MakePoint(-70.6795, -33.4399), 4326), 'Santiago'),
+('Museo Chileno de Arte Precolombino', 'Coleccion de arte de culturas precolombinas.', 'Museo', ST_SetSRID(ST_MakePoint(-70.6523, -33.4386), 4326), 'Santiago'),
+('Centro Cultural La Moneda', 'Centro cultural subterraneo con exposiciones.', 'Museo', ST_SetSRID(ST_MakePoint(-70.6538, -33.4435), 4326), 'Santiago'),
 
 -- Teatros
-('Teatro Municipal de Santiago', 'El centro cultural mas antiguo del pais.', 'Teatro', ST_SetSRID(ST_MakePoint(-70.6477, -33.4398), 4326), 'Santiago'),
-('Teatro Universidad de Chile', 'Teatro historico con programacion variada.', 'Teatro', ST_SetSRID(ST_MakePoint(-70.6495, -33.4405), 4326), 'Santiago'),
-('Centro Gabriela Mistral GAM', 'Moderno centro cultural con teatro y danza.', 'Teatro', ST_SetSRID(ST_MakePoint(-70.6465, -33.4375), 4326), 'Santiago'),
+('Teatro Municipal de Santiago', 'El centro cultural mas antiguo del pais.', 'Teatro', ST_SetSRID(ST_MakePoint(-70.6476, -33.4406), 4326), 'Santiago'),
+('Teatro Universidad de Chile', 'Teatro historico con programacion variada.', 'Teatro', ST_SetSRID(ST_MakePoint(-70.6343, -33.4374), 4326), 'Santiago'),
+('Centro Gabriela Mistral GAM', 'Moderno centro cultural con teatro y danza.', 'Teatro', ST_SetSRID(ST_MakePoint(-70.6399, -33.4389), 4326), 'Santiago'),
 
 -- Restaurantes CERCA de teatros (<100m)
-('Opera Catedral', 'Restaurante gourmet a pasos del Teatro Municipal.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6480, -33.4400), 4326), 'Santiago'),
+('Opera Catedral', 'Restaurante gourmet a pasos del Teatro Municipal.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6431, -33.4370), 4326), 'Santiago'),
 ('Confiteria Torres', 'Tradicional confiteria junto al Teatro Municipal.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6475, -33.4395), 4326), 'Santiago'),
 ('Cafe del Teatro', 'Cafe acogedor en el edificio del Teatro Universidad.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6496, -33.4406), 4326), 'Santiago'),
 
 -- Otros restaurantes
-('Bocanariz', 'Bar de vinos boutique con excelente gastronomia.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6353, -33.4385), 4326), 'Santiago'),
-('Liguria', 'Tradicional restaurante con ambiente bohemio.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6380, -33.4340), 4326), 'Santiago'),
-('Peumayen', 'Restaurante de comida ancestral chilena.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6360, -33.4320), 4326), 'Santiago'),
+('Bocanariz', 'Bar de vinos boutique con excelente gastronomia.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6412, -33.4382), 4326), 'Santiago'),
+('Liguria', 'Tradicional restaurante con ambiente bohemio.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6412, -33.4344), 4326), 'Santiago'),
+('Peumayen', 'Restaurante de comida ancestral chilena.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6349, -33.4325), 4326), 'Santiago'),
 ('Astrid y Gaston', 'Alta cocina peruana, uno de los mejores.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6150, -33.4100), 4326), 'Santiago'),
 
 -- Monumentos
-('La Moneda', 'Palacio de gobierno, un hito historico.', 'Monumento', ST_SetSRID(ST_MakePoint(-70.6538, -33.4426), 4326), 'Santiago'),
-('Plaza de Armas', 'Plaza principal de Santiago, centro historico.', 'Monumento', ST_SetSRID(ST_MakePoint(-70.6510, -33.4372), 4326), 'Santiago'),
-('Catedral Metropolitana', 'Imponente catedral neoclasica.', 'Monumento', ST_SetSRID(ST_MakePoint(-70.6505, -33.4370), 4326), 'Santiago'),
+('La Moneda', 'Palacio de gobierno, un hito historico.', 'Monumento', ST_SetSRID(ST_MakePoint(-70.6540, -33.4421), 4326), 'Santiago'),
+('Plaza de Armas', 'Plaza principal de Santiago, centro historico.', 'Monumento', ST_SetSRID(ST_MakePoint(-70.6510, -33.4377), 4326), 'Santiago'),
+('Catedral Metropolitana', 'Imponente catedral neoclasica.', 'Monumento', ST_SetSRID(ST_MakePoint(-70.6518, -33.4374), 4326), 'Santiago'),
 
 -- Cafes
 ('Cafe Colmado', 'Cafe artesanal con excelentes pasteles.', 'Cafe', ST_SetSRID(ST_MakePoint(-70.6400, -33.4350), 4326), 'Santiago'),
-('Wonderland Cafe', 'Cafe tematico con decoracion unica.', 'Cafe', ST_SetSRID(ST_MakePoint(-70.6420, -33.4345), 4326), 'Santiago'),
+('Wonderland Cafe', 'Cafe tematico con decoracion unica.', 'Cafe', ST_SetSRID(ST_MakePoint(-70.6420, -33.4378), 4326), 'Santiago'),
 
 -- Bares
-('The Clinic', 'Bar con terraza y buena seleccion de cervezas.', 'Bar', ST_SetSRID(ST_MakePoint(-70.6365, -33.4330), 4326), 'Santiago'),
-('La Piojera', 'Bar tradicional, famoso por la terremoto.', 'Bar', ST_SetSRID(ST_MakePoint(-70.6600, -33.4500), 4326), 'Santiago');
+('The Clinic', 'Bar con terraza y buena seleccion de cervezas.', 'Bar', ST_SetSRID(ST_MakePoint(-70.6652, -33.4413), 4326), 'Santiago'),
+('La Piojera', 'Bar tradicional, famoso por la terremoto.', 'Bar', ST_SetSRID(ST_MakePoint(-70.6520, -33.4334), 4326), 'Santiago');
 
 
 -- =============================================
@@ -269,10 +269,10 @@ INSERT INTO rutas_sugeridas (nombre, descripcion, id_usuario, camino) VALUES
     'Un recorrido caminando desde el Bellas Artes, pasando por la Plaza de Armas hasta La Moneda.',
     5,
     ST_GeomFromText('LINESTRING(
-        -70.6418 -33.4350,  
-        -70.6477 -33.4398,  
-        -70.6510 -33.4372,     
-        -70.6538 -33.4426     
+        -70.6435 -33.4351,  
+        -70.6476 -33.4406,  
+        -70.6510 -33.4377,     
+        -70.6540 -33.4421     
     )', 4326)
 ),
 (
@@ -280,9 +280,9 @@ INSERT INTO rutas_sugeridas (nombre, descripcion, id_usuario, camino) VALUES
     'Ruta ideal para ciclistas conectando áreas verdes principales.',
     8, 
     ST_GeomFromText('LINESTRING(
-        -70.6300 -33.4168, 
-        -70.6100 -33.4050,  
-        -70.6450 -33.4360   
+        -70.6311 -33.4197, 
+        -70.6034 -33.3933,  
+        -70.6412 -33.4355   
     )', 4326)
 ),
 (
@@ -290,9 +290,9 @@ INSERT INTO rutas_sugeridas (nombre, descripcion, id_usuario, camino) VALUES
     'Breve recorrido por los mejores lugares para comer.',
     2, 
     ST_GeomFromText('LINESTRING(
-        -70.6353 -33.4385,  
-        -70.6380 -33.4340,  
-        -70.6360 -33.4320   
+        -70.6412 -33.4382,  
+        -70.6412 -33.4344,  
+        -70.6349 -33.4325  
     )', 4326)
 );
 

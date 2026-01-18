@@ -96,20 +96,9 @@
           No se encontraron sitios turísticos a 5km de este punto.
         </p>
       </div>
-      <div class="stat-card">
-        <h2>👑 Consulta #2: Top Reseñadores</h2>
-        <div v-if="topReviewers.length > 0" class="leaderboard">
-          <div v-for="(reviewer, index) in topReviewers" :key="index" class="leaderboard-item">
-            <span class="rank">{{ index + 1 }}°</span>
-            <span class="name">{{ reviewer.nombreUsuario }}</span>
-            <span class="count">{{ reviewer.conteoreseñas }} reseñas</span>
-          </div>
-        </div>
-        <p v-else class="no-data">No hay reseñadores activos</p>
-      </div>
 
       <div class="stat-card full-width">
-        <h2>📍 Consulta #3: Análisis de Proximidad</h2>
+        <h2>📍 Consulta #2: Análisis de Proximidad</h2>
         <div v-if="proximityAnalysis.length > 0" class="data-table">
           <table>
             <thead>
@@ -129,6 +118,18 @@
           </table>
         </div>
         <p v-else class="no-data">No hay restaurantes cerca de teatros</p>
+      </div>
+
+      <div class="stat-card">
+        <h2>👑 Consulta #3: Top Reseñadores</h2>
+        <div v-if="topReviewers.length > 0" class="leaderboard">
+          <div v-for="(reviewer, index) in topReviewers" :key="index" class="leaderboard-item">
+            <span class="rank">{{ index + 1 }}°</span>
+            <span class="name">{{ reviewer.nombreUsuario }}</span>
+            <span class="count">{{ reviewer.conteoreseñas }} reseñas</span>
+          </div>
+        </div>
+        <p v-else class="no-data">No hay reseñadores activos</p>
       </div>
 
       <div class="stat-card">
