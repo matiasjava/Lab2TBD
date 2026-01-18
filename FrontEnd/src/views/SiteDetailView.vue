@@ -95,8 +95,11 @@
               Coordenadas no disponibles
             </p>
             <div class="map-preview">
-              <p>Vista previa del mapa</p>
-              <p class="map-placeholder-text">El mapa se mostrará aquí en futuras versiones</p>
+              <MiniMap 
+                :latitude="site.latitud" 
+                :longitude="site.longitud" 
+                :site-name="site.nombre"
+              />
             </div>
           </div>
         </aside>
@@ -149,6 +152,7 @@ import ReviewCard from '@/components/reviews/ReviewCard.vue'
 import PhotoUpload from '@/components/photos/PhotoUpload.vue'
 import PhotoCard from '@/components/photos/PhotoCard.vue'
 import AddToListModal from '@/components/lists/AddToListModal.vue'
+import MiniMap from '@/components/maps/MiniMap.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -455,18 +459,7 @@ section h2 {
 }
 
 .map-preview {
-  background-color: #ecf0f1;
-  border: 2px dashed #bdc3c7;
-  border-radius: 6px;
-  padding: 2rem;
-  text-align: center;
   margin-top: 1rem;
-}
-
-.map-placeholder-text {
-  color: #7f8c8d;
-  font-size: 0.9rem;
-  margin: 0.5rem 0 0 0;
 }
 
 @media (max-width: 968px) {

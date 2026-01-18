@@ -17,24 +17,10 @@
       </div>
     </div>
 
-    <div class="map-section">
+    <div v-if="isAuthenticated" class="map-section">
       <div class="container">
         <h2>Mapa Interactivo</h2>
-        <div class="map-placeholder">
-          <div class="map-info">
-            <h3>🗺️ Próximamente: Mapa Interactivo</h3>
-            <p>
-              En esta sección podrás visualizar todos los sitios turísticos
-              en un mapa interactivo con filtros por tipo, calificación y distancia.
-            </p>
-            <ul>
-              <li>Visualiza sitios en tiempo real</li>
-              <li>Filtra por tipo de lugar</li>
-              <li>Descubre lugares cercanos</li>
-              <li>Ve calificaciones y fotos</li>
-            </ul>
-          </div>
-        </div>
+        <InteractiveMap />
       </div>
     </div>
 
@@ -67,6 +53,7 @@ import Navbar from '@/components/layout/Navbar.vue'
 import SiteCard from '@/components/common/SiteCard.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorMessage from '@/components/common/ErrorMessage.vue'
+import InteractiveMap from '@/components/maps/InteractiveMap.vue'
 
 const sitesStore = useSitesStore()
 const authStore = useAuthStore()
@@ -150,53 +137,6 @@ onMounted(async () => {
 
 .map-section {
   background-color: white;
-  padding: 3rem 0;
-}
-
-.map-placeholder {
-  background-color: #ecf0f1;
-  border: 2px dashed #bdc3c7;
-  border-radius: 12px;
-  padding: 3rem;
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.map-info {
-  text-align: center;
-  max-width: 600px;
-}
-
-.map-info h3 {
-  color: #2c3e50;
-  font-size: 1.75rem;
-  margin: 0 0 1rem 0;
-}
-
-.map-info p {
-  color: #7f8c8d;
-  margin: 0 0 1.5rem 0;
-  line-height: 1.6;
-}
-
-.map-info ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.map-info ul li {
-  color: #34495e;
-  padding: 0.5rem 0;
-  font-weight: 500;
-}
-
-.map-info ul li::before {
-  content: '✓ ';
-  color: #27ae60;
-  font-weight: bold;
   margin-right: 0.5rem;
 }
 
