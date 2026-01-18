@@ -1,7 +1,7 @@
 <template>
   <div class="mini-map-container">
     <l-map
-      v-if="latitude && longitude"
+      v-if="latitude && longitude && isReady"
       :zoom="zoom"
       :center="[latitude, longitude]"
       :options="mapOptions"
@@ -26,13 +26,14 @@
     </l-map>
     
     <div v-else class="mini-map-error">
-      <p>Coordenadas no disponibles</p>
+      <p v-if="!isReady">Cargando mapa...</p>
+      <p v-else>Coordenadas no disponibles</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, nextTick } from 'vue'
 import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
 
@@ -56,6 +57,15 @@ const props = defineProps({
     type: Number,
     default: 15
   }
+})
+
+const isReady = ref(false)
+
+onMounted(async () => {
+  await nextTick()
+  setTimeout(() => {
+    isReady.value = true
+  }, 100)
 })
 
 const mapOptions = {
@@ -95,11 +105,14 @@ const markerIcon = L.divIcon({
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
 }
 
 .mini-map {
   width: 100%;
   height: 100%;
+  z-index: 1;
 }
 
 .mini-map-error {

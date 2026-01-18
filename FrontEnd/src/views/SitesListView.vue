@@ -2,6 +2,7 @@
   <div class="sites-list-view">
     <Navbar />
 
+
     <div class="container">
       <div class="header">
         <h1>Explorar Sitios Turísticos</h1>
@@ -10,6 +11,10 @@
         </router-link>
       </div>
 
+      <div class="map-section">
+        <InteractiveMap />
+      </div>
+      
       <div class="filters">
         <div class="filter-group">
           <label>Tipo de sitio</label>
@@ -18,6 +23,7 @@
             <option value="Parque">Parque</option>
             <option value="Museo">Museo</option>
             <option value="Restaurante">Restaurante</option>
+            <option value="Bar">Bar</option>
             <option value="Playa">Playa</option>
             <option value="Monumento">Monumento</option>
             <option value="Teatro">Teatro</option>
@@ -33,16 +39,6 @@
             placeholder="Nombre del sitio..."
             @input="filterSites"
           />
-        </div>
-      </div>
-
-      <!-- Placeholder para Mapa Interactivo (Laboratorio 2) -->
-      <div class="map-placeholder">
-        <div class="map-placeholder-content">
-          <div class="map-icon">🗺️</div>
-          <h3>Mapa Interactivo</h3>
-          <p>Aquí se mostrará la ubicación de los sitios turísticos</p>
-          <p class="map-note">Funcionalidad disponible en la siguiente entrega</p>
         </div>
       </div>
 
@@ -71,6 +67,7 @@ import Navbar from '@/components/layout/Navbar.vue'
 import SiteCard from '@/components/common/SiteCard.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorMessage from '@/components/common/ErrorMessage.vue'
+import InteractiveMap from '@/components/maps/InteractiveMap.vue'
 
 const sitesStore = useSitesStore()
 
@@ -88,7 +85,7 @@ const filteredSites = computed(() => {
     const query = searchQuery.value.toLowerCase()
     sites = sites.filter(site =>
       site.nombre.toLowerCase().includes(query) ||
-      site.descripcion?.toLowerCase().includes(query)
+      (site.descripcion && site.descripcion.toLowerCase().includes(query))
     )
   }
 
@@ -97,13 +94,14 @@ const filteredSites = computed(() => {
 
 const filterSites = async () => {
   if (selectedType.value) {
-    await sitesStore.searchByType(selectedType.value)
+    if (sitesStore.sites.length === 0) await sitesStore.fetchAll()
   } else {
     await sitesStore.fetchAll()
   }
 }
 
 onMounted(async () => {
+  // Cargamos los sitios al montar
   await sitesStore.fetchAll()
 })
 </script>
@@ -184,56 +182,10 @@ onMounted(async () => {
   border-color: #3498db;
 }
 
-/* Placeholder para Mapa Interactivo */
-.map-placeholder {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  padding: 3rem 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.map-placeholder-content {
-  text-align: center;
-  color: white;
-}
-
-.map-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.map-placeholder-content h3 {
-  font-size: 1.8rem;
-  margin: 0 0 0.5rem 0;
-  font-weight: 700;
-}
-
-.map-placeholder-content p {
-  font-size: 1.1rem;
-  margin: 0.5rem 0;
-  opacity: 0.95;
-}
-
-.map-note {
-  font-size: 0.9rem !important;
-  opacity: 0.8 !important;
-  font-style: italic;
-  margin-top: 1rem !important;
+/* Estilo para el contenedor del mapa */
+.map-section {
+  margin-bottom: 3rem;
+  width: 100%;
 }
 
 .sites-grid {

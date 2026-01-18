@@ -18,6 +18,10 @@
           <option value="Iglesia">Iglesia</option>
           <option value="Mercado">Mercado</option>
           <option value="Centro Cultural">Centro Cultural</option>
+          <option value="Restaurante">Restaurante</option>
+          <option value="Bar">Bar</option>
+          <option value="Teatro">Teatro</option>
+          <option value="Cafe">Cafe</option>
           <option value="Otro">Otro</option>
         </select>
       </div>
@@ -74,7 +78,7 @@
       </div>
 
       <l-map
-        v-else
+        v-else-if="isReady"
         ref="mapRef"
         :zoom="zoom"
         :center="center"
@@ -145,7 +149,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { LMap, LTileLayer, LMarker, LPopup, LCircle } from '@vue-leaflet/vue-leaflet'
 import L from 'leaflet'
@@ -162,6 +166,7 @@ const zoom = ref(13)
 const center = ref([-33.4489, -70.6693])
 const userLocation = ref(null)
 const gettingLocation = ref(false)
+const isReady = ref(false)
 
 const filters = ref({
   tipo: '',
@@ -229,6 +234,10 @@ const getMarkerIcon = (tipo) => {
     'Iglesia': { color: '#8e44ad', symbol: 'I' },
     'Mercado': { color: '#d35400', symbol: 'M' },
     'Centro Cultural': { color: '#c0392b', symbol: 'C' },
+    'Restaurante': { color: '#e74c3c', symbol: 'R' },
+    'Bar': { color: '#2c3e50', symbol: 'B' },
+    'Teatro': { color: '#3498db', symbol: 'T' },
+    'Cafe': { color: '#d68910', symbol: 'C' },  
     'Otro': { color: '#7f8c8d', symbol: '•' }
   }
 
@@ -355,9 +364,13 @@ const onMapReady = () => {
   console.log('Mapa listo')
 }
 
-onMounted(() => {
+onMounted(async () => {
   loadSites()
   getUserLocation()
+  await nextTick()
+  setTimeout(() => {
+    isReady.value = true
+  }, 100)
 })
 </script>
 

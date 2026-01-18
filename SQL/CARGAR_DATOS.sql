@@ -89,7 +89,7 @@ INSERT INTO sitios_turisticos (nombre, descripcion, tipo, ubicacion, ciudad) VAL
 -- Parques
 ('Cerro San Cristobal', 'El gran parque urbano de Santiago, con vistas panoramicas.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6311, -33.4197), 4326), 'Santiago'),
 ('Parque Forestal', 'Hermoso parque lineal a lo largo del rio Mapocho.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6412, -33.4355), 4326), 'Santiago'),
-('Parque Bicentenario', 'Moderno parque con lagunas artificiales y esculturas.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6034, -33.3933), 4326), 'Santiago'),
+('Parque Bicentenario', 'Moderno parque con lagunas artificiales y esculturas.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6025, -33.3984), 4326), 'Santiago'),
 ('Parque Quinta Normal', 'Amplio parque con museos, lagunas y areas verdes.', 'Parque', ST_SetSRID(ST_MakePoint(-70.6828, -33.4409), 4326), 'Santiago'),
 
 -- Museos
