@@ -104,9 +104,9 @@ INSERT INTO sitios_turisticos (nombre, descripcion, tipo, ubicacion, ciudad) VAL
 ('Centro Gabriela Mistral GAM', 'Moderno centro cultural con teatro y danza.', 'Teatro', ST_SetSRID(ST_MakePoint(-70.6399, -33.4389), 4326), 'Santiago'),
 
 -- Restaurantes CERCA de teatros (<100m)
-('Opera Catedral', 'Restaurante gourmet a pasos del Teatro Municipal.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6431, -33.4370), 4326), 'Santiago'),
-('Confiteria Torres', 'Tradicional confiteria junto al Teatro Municipal.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6475, -33.4395), 4326), 'Santiago'),
-('Cafe del Teatro', 'Cafe acogedor en el edificio del Teatro Universidad.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6496, -33.4406), 4326), 'Santiago'),
+('Restaurante Make Make', 'Restaurante gourmet a pasos del Teatro Municipal.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6476, -33.4413), 4326), 'Santiago'),
+('Vichuquen', 'Restaurante de comida chilena junto al Teatro Municipal.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6477, -33.4413), 4326), 'Santiago'),
+('Aki Go Sushi', 'Restaurante de sushi y gohan cerca del Teatro Universidad de chile.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6340, -33.4375), 4326), 'Santiago'),
 
 -- Otros restaurantes
 ('Bocanariz', 'Bar de vinos boutique con excelente gastronomia.', 'Restaurante', ST_SetSRID(ST_MakePoint(-70.6412, -33.4382), 4326), 'Santiago'),
@@ -159,8 +159,8 @@ BEGIN
         (4, 9, 'El Teatro Municipal es joya arquitectonica.', 5, NOW() - INTERVAL '7 days'),
         (4, 10, 'Teatro Universidad de Chile tiene una rica historia.', 5, NOW() - INTERVAL '13 days'),
         (4, 11, 'GAM es un espacio moderno y versatil.', 5, NOW() - INTERVAL '19 days'),
-        (4, 12, 'Opera Catedral es perfecto para comer antes de la funcion.', 4, NOW() - INTERVAL '8 days'),
-        (4, 13, 'Confiteria Torres es un clasico santiaguino.', 4, NOW() - INTERVAL '15 days'),
+        (4, 12, 'El restaurante Make Make es perfecto para comer antes de la funcion.', 4, NOW() - INTERVAL '8 days'),
+        (4, 13, 'Vichuquen es un clasico santiaguino.', 4, NOW() - INTERVAL '15 days'),
         -- Elena Fernandez (ID 5)
         (5, 19, 'La Moneda tiene tanta historia. Recomiendo el tour guiado.', 5, NOW() - INTERVAL '5 days'),
         (5, 20, 'Plaza de Armas es el corazon de Santiago.', 5, NOW() - INTERVAL '10 days'),
@@ -171,7 +171,7 @@ BEGIN
         (6, 15, 'Bocanariz es mi lugar favorito. La carta de vinos es excelente.', 5, NOW() - INTERVAL '2 days'),
         (6, 17, 'Peumayen tiene un maridaje perfecto.', 5, NOW() - INTERVAL '6 days'),
         (6, 18, 'La bodega de Astrid y Gaston es impresionante.', 5, NOW() - INTERVAL '12 days'),
-        (6, 12, 'Opera Catedral tiene una carta de vinos sorprendente.', 4, NOW() - INTERVAL '16 days'),
+        (6, 12, 'El restaurante Make Make tiene una carta de vinos sorprendente.', 4, NOW() - INTERVAL '16 days'),
         -- Gabriela Rojas (ID 7)
         (7, 9, 'La arquitectura del Teatro Municipal es sublime.', 5, NOW() - INTERVAL '4 days'),
         (7, 5, 'El Palacio de Bellas Artes es una joya arquitectonica.', 5, NOW() - INTERVAL '9 days'),
@@ -199,7 +199,8 @@ BEGIN
         (2, 22, 'El cafe es excelente y los pasteles caseros son increibles.', 5, NOW() - INTERVAL '4 days'),
         (3, 23, 'Wonderland es magico, perfecto para una tarde con amigas.', 5, NOW() - INTERVAL '6 days'),
         (6, 24, 'The Clinic tiene buena seleccion de cervezas artesanales.', 4, NOW() - INTERVAL '8 days'),
-        (1, 14, 'Cafe del Teatro es ideal para conversar despues de la funcion.', 4, NOW() - INTERVAL '12 days'),
+        -- Mas resenas para restaurantes
+        (1, 14, 'Aki Go Sushi es ideal para comer sushi', 4, NOW() - INTERVAL '12 days'),
         -- Resena antigua para consulta #7
         (1, 25, 'Experiencia autentica en La Piojera. Muy tradicional.', 3, NOW() - INTERVAL '120 days');
 
@@ -225,8 +226,8 @@ BEGIN
             (4, 9, 'El Teatro Municipal es joya arquitectonica.', 5, NOW() - INTERVAL '7 days'),
             (4, 10, 'Teatro Universidad tiene historia.', 5, NOW() - INTERVAL '13 days'),
             (4, 11, 'GAM es un espacio moderno.', 5, NOW() - INTERVAL '19 days'),
-            (4, 12, 'Opera Catedral es perfecto.', 4, NOW() - INTERVAL '8 days'),
-            (4, 13, 'Confiteria Torres es un clasico.', 4, NOW() - INTERVAL '15 days'),
+            (4, 12, 'El restaurante Make Make es perfecto.', 4, NOW() - INTERVAL '8 days'),
+            (4, 13, 'Vichuquen es un clasico.', 4, NOW() - INTERVAL '15 days'),
             (5, 19, 'La Moneda tiene tanta historia.', 5, NOW() - INTERVAL '5 days'),
             (5, 20, 'Plaza de Armas es el corazon de Santiago.', 5, NOW() - INTERVAL '10 days'),
             (5, 21, 'La Catedral es impresionante.', 5, NOW() - INTERVAL '15 days'),
@@ -235,7 +236,7 @@ BEGIN
             (6, 15, 'Bocanariz es mi favorito.', 5, NOW() - INTERVAL '2 days'),
             (6, 17, 'Peumayen tiene maridaje perfecto.', 5, NOW() - INTERVAL '6 days'),
             (6, 18, 'Astrid y Gaston es impresionante.', 5, NOW() - INTERVAL '12 days'),
-            (6, 12, 'Opera Catedral tiene vinos sorprendentes.', 4, NOW() - INTERVAL '16 days'),
+            (6, 12, 'El restaurante Make Make tiene vinos sorprendentes.', 4, NOW() - INTERVAL '16 days'),
             (7, 9, 'Teatro Municipal es sublime.', 5, NOW() - INTERVAL '4 days'),
             (7, 5, 'Palacio de Bellas Artes es una joya.', 5, NOW() - INTERVAL '9 days'),
             (7, 21, 'La Catedral es impresionante.', 5, NOW() - INTERVAL '14 days'),
@@ -258,7 +259,7 @@ BEGIN
             (2, 22, 'Los pasteles son increibles.', 5, NOW() - INTERVAL '4 days'),
             (3, 23, 'Wonderland es magico.', 5, NOW() - INTERVAL '6 days'),
             (6, 24, 'The Clinic tiene cervezas artesanales.', 4, NOW() - INTERVAL '8 days'),
-            (1, 14, 'Cafe del Teatro es ideal.', 4, NOW() - INTERVAL '12 days'),
+            (1, 14, 'Aki Go Sushi es ideal para comer sushi.', 4, NOW() - INTERVAL '12 days'),
             (1, 25, 'La Piojera es tradicional.', 3, NOW() - INTERVAL '120 days');
     END;
 END $$;
@@ -321,6 +322,9 @@ INSERT INTO fotografias (id_usuario, id_sitio, url, fecha) VALUES
 (5, 20, 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/12/6a/a0/24/20180322-145842-largejpg.jpg?w=900&h=-1&s=1', NOW() - INTERVAL '10 days'),
 (5, 21, 'https://www.uc.cl/site/assets/files/18106/catedral_stgo_istock.700x532.jpg', NOW() - INTERVAL '15 days'),
 (10, 1, 'https://s3.amazonaws.com/entrekidscl/vich_files/actividadfoto/6398e83e97108527128869.png', NOW() - INTERVAL '2 days'),
+(6, 12, 'https://www.800.cl/galeriasitios/Och/2022/11/18/Och__800-Mak-Make-Almacruz-2022-11-FG-lugar-F5-IMG_6309.jpg', NOW() - INTERVAL '6 days'),
+(6, 13, 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/25/72/22/beppo-vichuquen.jpg?w=900&h=500&s=1', NOW() - INTERVAL '8 days'),
+(8, 14, 'https://static.where-e.com/Chile/Santiago_Metropolitan_Region/Melipilla/Autumn-Sushi_f2528c3b8a4eccccb6696744cab2a79e.jpg', NOW() - INTERVAL '10 days'),
 (10, 1, 'https://media-cdn.tripadvisor.com/media/photo-s/0e/43/e3/9d/cerro-san-cristobal.jpg', NOW() - INTERVAL '2 days'),
 (10, 2, 'https://fvb.cl/wp-content/uploads/2021/02/202101_va_blogforestal-9.jpg', NOW() - INTERVAL '6 days'),
 (10, 5, 'https://images.mnstatic.com/20/23/20233d12cd1eaf67bc29927b9c103dea.jpg', NOW() - INTERVAL '11 days'),
