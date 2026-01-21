@@ -36,6 +36,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/sitios/zona',
+      name: 'zone-search',
+      component: () => import('@/views/ZoneSearchView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/sitios/crear',
       name: 'site-create',
       component: () => import('@/views/SiteFormView.vue'),

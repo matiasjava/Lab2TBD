@@ -15,6 +15,9 @@
           <router-link v-if="isAuthenticated" to="/sitios/cercanos" class="navbar-item">
             Buscar Cercanos
           </router-link>
+          <router-link v-if="isAuthenticated" to="/sitios/zona" class="navbar-item">
+            Buscar por Zona
+          </router-link>
           <router-link v-if="isAuthenticated" to="/mis-listas" class="navbar-item">
             Mis Listas
           </router-link>

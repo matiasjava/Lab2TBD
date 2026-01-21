@@ -41,5 +41,10 @@ export const sitesService = {
   async getPopularSites() {
     const response = await api.get('/sitios/populares')
     return response.data
+  },
+
+  async searchInZone(puntos) {
+    const response = await api.post('/sitios/zona', { puntos })
+    return response.data
   }
 }
