@@ -420,3 +420,17 @@ SELECT
 FROM resumen_contribuciones_usuario
 ORDER BY total DESC
 LIMIT 10;
+
+
+-- consulta 4 lab2 --
+INSERT INTO rutas_sugeridas (nombre, descripcion, id_usuario, camino) VALUES
+('Ruta Historica Santiago Centro', 'Un recorrido caminando desde el Bellas Artes, pasando por la Plaza de Armas hasta La Moneda.', 5, 
+ ST_GeomFromText('LINESTRING(-70.6435 -33.4351, -70.6476 -33.4406, -70.6510 -33.4377, -70.6540 -33.4421)', 4326)),
+('Circuito de Parques en Bici', 'Ruta ideal para ciclistas conectando areas verdes principales.', 8, 
+ ST_GeomFromText('LINESTRING(-70.6311 -33.4197, -70.6025 -33.3984, -70.6412 -33.4355)', 4326)),
+('Paseo Gastronomico Lastarria', 'Breve recorrido por los mejores lugares para comer.', 2, 
+ ST_GeomFromText('LINESTRING(-70.6412 -33.4382, -70.6412 -33.4344, -70.6349 -33.4325)', 4326)),
+('Ruta del Centro Historico', 'Recorrido por los puntos mas importantes del casco antiguo.', 5,
+ ST_GeomFromText('LINESTRING(-70.6510 -33.4377, -70.6518 -33.4374, -70.6540 -33.4421, -70.6476 -33.4406)', 4326)),
+('Circuito de Museos', 'Visita a los museos de Bellas Artes y Arte Contemporaneo.', 1,
+ ST_GeomFromText('LINESTRING(-70.6435 -33.4351, -70.6523 -33.4386, -70.6538 -33.4435)', 4326));
