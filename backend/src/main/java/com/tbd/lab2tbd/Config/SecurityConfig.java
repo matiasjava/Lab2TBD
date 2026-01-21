@@ -15,11 +15,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
-/**
- * Esta es la configuración de seguridad principal.
- * REEMPLAZA el archivo que tenías.
- */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -31,65 +28,51 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Deshabilitamos CSRF (común en APIs REST)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Habilitamos CORS con configuración segura
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // Aquí definimos las REGLAS de autorización
                 .authorizeHttpRequests(auth -> auth
-                        // Permitimos el acceso PÚBLICO a los endpoints de autenticación (login y registro)
+                        // Endpoints públicos
                         .requestMatchers("/auth/**").permitAll()
-
                         .requestMatchers("/api/estadisticas/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Permitimos el metodo
-                        .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                        // *** RUTAS - Acceso público para testing ***
+                        .requestMatchers("/rutas/**").permitAll()
 
-                        // CUALQUIER OTRA petición requiere autenticación
+                        // Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated()
                 )
 
-                // Configuramos la gestión de sesión como STATELESS (sin estado)
-                // Spring Security no creará sesiones.
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                // Le decimos a Spring qué proveedor de autenticación usar
                 .authenticationProvider(authenticationProvider)
-
-                // Añadimos nuestro filtro JWT ANTES del filtro de autenticación estándar
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    /**
-     * Configuración de CORS (Cross-Origin Resource Sharing)
-     * Permite que el frontend (Vue.js) en localhost:5173 pueda comunicarse con el backend
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Orígenes permitidos: SOLO el frontend de Vue.js
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://127.0.0.1:5173"
+        ));
 
-        // Métodos HTTP permitidos
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+        ));
 
-        // Headers permitidos (incluyendo Authorization para JWT)
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // Permitir envío de credenciales (necesario para JWT en headers)
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-
-        // Headers expuestos al frontend
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
-
-        // Tiempo de cache para la configuración de CORS (1 hora)
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setMaxAge(3600L);
 
-        // Aplicar esta configuración a todos los endpoints
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 

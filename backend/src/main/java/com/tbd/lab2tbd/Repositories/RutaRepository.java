@@ -18,47 +18,53 @@ public class RutaRepository {
 
     private final NamedParameterJdbcTemplate jdbc;
 
-    // Mapper para convertir la respuesta SQL a objeto Java
-    private static final RowMapper<Ruta> MAPPER = new RowMapper<>() {
-        @Override
-        public Ruta mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new Ruta(
-                rs.getLong("id"),
-                rs.getString("nombre"),
-                rs.getString("descripcion"),
-                rs.getLong("id_usuario"),
-                rs.getString("nombre_usuario"),
-                rs.getString("geojson"), // PostGIS nos da el JSON listo
-                rs.getDouble("kilometros"),
-                rs.getTimestamp("fecha_creacion")
-            );
-        }
-    };
+    private static final RowMapper<Ruta> MAPPER = (rs, rowNum) -> new Ruta(
+            rs.getLong("id"),
+            rs.getString("nombre"),
+            rs.getString("descripcion"),
+            rs.getLong("id_usuario"),
+            rs.getString("nombre_usuario"),
+            rs.getString("geojson"),
+            rs.getDouble("longitud_km"),
+            rs.getTimestamp("fecha_creacion")
+    );
 
     public List<Ruta> findAll() {
-        // Obtenemos la geometría como GeoJSON y calculamos la longitud en KM
         String sql = """
-            SELECT r.id, r.nombre, r.descripcion, r.id_usuario, u.nombre as nombre_usuario, r.fecha_creacion,
-                   ST_AsGeoJSON(r.camino) as geojson,
-                   (ST_Length(r.camino::geography) / 1000) as kilometros
+            SELECT 
+                r.id, 
+                r.nombre, 
+                r.descripcion, 
+                r.id_usuario, 
+                u.nombre as nombre_usuario, 
+                r.fecha_creacion,
+                ST_AsGeoJSON(r.camino) as geojson,
+                ROUND(CAST(ST_Length(r.camino::geography) / 1000 AS numeric), 2) as longitud_km
             FROM rutas_sugeridas r
-            JOIN usuarios u ON r.id_usuario = u.id
+            INNER JOIN usuarios u ON r.id_usuario = u.id
             ORDER BY r.fecha_creacion DESC
         """;
-        return jdbc.query(sql, MAPPER);
+
+        try {
+            List<Ruta> rutas = jdbc.query(sql, MAPPER);
+            System.out.println("RutaRepository.findAll() - Rutas encontradas: " + rutas.size());
+            return rutas;
+        } catch (Exception e) {
+            System.err.println("Error en RutaRepository.findAll(): " + e.getMessage());
+            e.printStackTrace();
+            return List.of();
+        }
     }
 
     public Long create(RutaRequest ruta) {
-        // Convertir la lista de coordenadas [[lat, lon]] a WKT LINESTRING(lon lat, lon lat)
-        // OJO: PostGIS usa (Longitud Latitud), pero Leaflet manda [Latitud, Longitud]
         StringBuilder wkt = new StringBuilder("LINESTRING(");
         for (int i = 0; i < ruta.getCoordenadas().size(); i++) {
             List<Double> punto = ruta.getCoordenadas().get(i);
             Double lat = punto.get(0);
             Double lon = punto.get(1);
-            wkt.append(lon).append(" ").append(lat); // Espacio entre lon y lat
+            wkt.append(lon).append(" ").append(lat);
             if (i < ruta.getCoordenadas().size() - 1) {
-                wkt.append(","); // Coma entre puntos
+                wkt.append(", ");
             }
         }
         wkt.append(")");
@@ -75,6 +81,14 @@ public class RutaRepository {
                 .addValue("idUsuario", ruta.getIdUsuario())
                 .addValue("wkt", wkt.toString());
 
-        return jdbc.queryForObject(sql, params, Long.class);
+        try {
+            Long id = jdbc.queryForObject(sql, params, Long.class);
+            System.out.println("Ruta creada con ID: " + id);
+            return id;
+        } catch (Exception e) {
+            System.err.println("Error al crear ruta: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 }
