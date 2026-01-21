@@ -1,6 +1,6 @@
 <template>
   <div class="lists-view">
-    <Navbar />
+    
 
     <div class="container">
       <div class="header">

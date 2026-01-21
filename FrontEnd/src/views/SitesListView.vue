@@ -1,7 +1,6 @@
 <template>
   <div class="sites-list-view">
-    <Navbar />
-
+   
 
     <div class="container">
       <div class="header">

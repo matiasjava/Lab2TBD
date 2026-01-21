@@ -1,49 +1,35 @@
 <script setup>
 import { RouterView } from 'vue-router'
+import Navbar from './components/layout/Navbar.vue' 
 </script>
 
 <template>
   <div id="app">
-    <RouterView />
+   
+    <Navbar />
+    
+    <main>
+      <RouterView />
+    </main>
   </div>
 </template>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #f8f9fa;
+  color: #2c3e50;
 }
 
-#app {
-  min-height: 100vh;
-}
-
-a {
-  color: #3498db;
-  transition: color 0.3s;
-}
-
-a:hover {
-  color: #2980b9;
-}
-
-button {
-  font-family: inherit;
-}
-
-input,
-textarea,
-select {
-  font-family: inherit;
+main {
+  padding-top: 20px; 
+  min-height: 90vh;
 }
 </style>

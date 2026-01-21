@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { authService } from '@/services/authService'
 
+import RoutesView from '../views/RoutesView.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -86,6 +88,13 @@ const router = createRouter({
       name: 'statistics',
       component: () => import('@/views/StatisticsView.vue'),
       meta: { requiresAuth: true }
+    },
+    
+    {
+       path: '/rutas',
+       name: 'rutas',
+       component: RoutesView,
+       meta: { requiresAuth: true }
     }
   ]
 })
@@ -93,11 +102,11 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isAuthenticated = authService.isAuthenticated()
 
-  // Rutas que requieren autenticación
+  
   if (to.meta.requiresAuth && !isAuthenticated) {
     next({ name: 'login' })
   }
-  // Rutas solo para invitados (login/register)
+  
   else if (to.meta.requiresGuest && isAuthenticated) {
     next({ name: 'home' })
   }

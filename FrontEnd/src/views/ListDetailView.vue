@@ -1,6 +1,6 @@
 <template>
   <div class="list-detail-view">
-    <Navbar />
+    
 
     <div class="container">
       <LoadingSpinner v-if="loading" message="Cargando lista..." />

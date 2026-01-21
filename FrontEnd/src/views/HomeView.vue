@@ -1,6 +1,6 @@
 <template>
   <div class="home-view">
-    <Navbar />
+    
 
     <div class="hero-section">
       <div class="hero-content">

@@ -1,6 +1,6 @@
 <template>
   <div class="nearby-sites-view">
-    <Navbar />
+    
 
     <div class="header">
       <h1>🗺️ Buscar Sitios Cercanos</h1>

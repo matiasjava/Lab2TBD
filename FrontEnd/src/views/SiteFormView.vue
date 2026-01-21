@@ -1,6 +1,6 @@
 <template>
   <div class="site-form-view">
-    <Navbar />
+    
 
     <div class="container">
       <div class="form-header">

@@ -1,6 +1,6 @@
 <template>
   <div class="profile-view">
-    <Navbar />
+    
 
     <div class="container">
       <LoadingSpinner v-if="loading" message="Cargando perfil..." />

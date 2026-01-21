@@ -1,6 +1,6 @@
 <template>
   <div class="statistics-view">
-    <Navbar />
+  
 
     <div class="header">
       <h1>📊 Panel de Estadísticas</h1>

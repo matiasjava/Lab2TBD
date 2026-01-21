@@ -1,6 +1,6 @@
 <template>
   <div class="site-detail-view">
-    <Navbar />
+    
 
     <LoadingSpinner v-if="loading" message="Cargando sitio..." />
 
