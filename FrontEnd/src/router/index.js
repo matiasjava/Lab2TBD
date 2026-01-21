@@ -18,7 +18,7 @@ const router = createRouter({
       meta: { requiresGuest: true }
     },
     {
-      path: '/register',
+      path: '/registro',
       name: 'register',
       component: () => import('@/views/RegisterView.vue'),
       meta: { requiresGuest: true }
@@ -95,7 +95,12 @@ const router = createRouter({
       component: () => import('@/views/StatisticsView.vue'),
       meta: { requiresAuth: true }
     },
-    
+    {
+        path: '/rutas/crear',
+        name: 'route-create',
+        component: () => import('@/views/RouteFormView.vue'),
+        meta: { requiresAuth: true }
+    },
     {
        path: '/rutas',
        name: 'rutas',
@@ -108,11 +113,9 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isAuthenticated = authService.isAuthenticated()
 
-  
   if (to.meta.requiresAuth && !isAuthenticated) {
     next({ name: 'login' })
   }
-  
   else if (to.meta.requiresGuest && isAuthenticated) {
     next({ name: 'home' })
   }

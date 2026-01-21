@@ -36,7 +36,7 @@ public class EstadisticasController {
     }
 
     /**
-     * Consulta #3: Análisis de proximidad (Restaurantes cerca de Teatros).
+     * Consulta #2: Análisis de proximidad (Restaurantes cerca de Teatros).
      */
     @GetMapping("/proximidad")
     public ResponseEntity<List<ProximidadSitiosResponse>> obtenerAnalisisProximidad() {

@@ -113,7 +113,7 @@ public class SitioTuristicoController {
 
     /**
      * POST /api/sitios/zona
-     * Busca sitios turísticos dentro de una zona definida por un polígono.
+     * Consulta 3: Busca sitios turísticos dentro de una zona definida por un polígono.
      * Requiere autenticación JWT.
      *
      * @param zona Objeto con la lista de puntos que definen el polígono

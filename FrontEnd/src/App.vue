@@ -29,7 +29,7 @@ body {
 }
 
 main {
-  padding-top: 20px; 
-  min-height: 90vh;
+  padding-top: 0; 
+  min-height: 0;
 }
 </style>

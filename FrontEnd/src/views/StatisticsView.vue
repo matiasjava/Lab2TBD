@@ -120,37 +120,34 @@
         <p v-else class="no-data">No hay restaurantes cerca de teatros</p>
       </div>
 
-      <div class="stat-card">
-        <h2>👑 Consulta #3: Top Reseñadores</h2>
-        <div v-if="topReviewers.length > 0" class="leaderboard">
-          <div v-for="(reviewer, index) in topReviewers" :key="index" class="leaderboard-item">
-            <span class="rank">{{ index + 1 }}°</span>
-            <span class="name">{{ reviewer.nombreUsuario }}</span>
-            <span class="count">{{ reviewer.conteoreseñas }} reseñas</span>
-          </div>
-        </div>
-        <p v-else class="no-data">No hay reseñadores activos</p>
-      </div>
+      <div class="stat-card full-width">
+  <h2>📏 Consulta #4: Longitud de Rutas (ST_Length)</h2>
+  
+  <div v-if="routesList.length > 0" class="data-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre Ruta</th>
+          <th>Creado por</th>
+          <th>Longitud Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="ruta in routesList" :key="ruta.id">
+          <td class="name-cell">{{ ruta.nombre }}</td>
+          <td>{{ ruta.nombreUsuario || 'Anónimo' }}</td>
+          <td class="distance-cell">
+            {{ ruta.longitudKm ? ruta.longitudKm.toFixed(2) + ' km' : '0 km' }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-      <div class="stat-card">
-        <h2>⚠️ Consulta: Valoraciones Inusuales</h2>
-        <div v-if="unusualRatings.length > 0" class="site-list">
-          <div v-for="site in (showAllUnusual ? unusualRatings : unusualRatings.slice(0, 5))" :key="site.nombre" class="site-item">
-            <div class="site-name">{{ site.nombre }}</div>
-            <div class="site-stats">
-              <span class="rating">⭐ {{ site.calificacionPromedio?.toFixed(1) }}</span>
-              <span class="count">{{ site.totalreseñas }} reseñas</span>
-            </div>
-          </div>
-          <div v-if="unusualRatings.length > 5" class="toggle-container">
-            <button @click="showAllUnusual = !showAllUnusual" class="btn-toggle">
-              {{ showAllUnusual ? '▲ Ver menos' : '▼ Ver todos (' + unusualRatings.length + ')' }}
-            </button>
-          </div>
-        </div>
-        <p v-else class="no-data">No hay sitios con estas características</p>
-      </div>
-
+  <p v-else class="no-data">
+    No existen rutas guardadas.
+  </p>
+</div>
     </div>
   </div>
 </template>
@@ -160,6 +157,7 @@ import { ref, onMounted, computed } from 'vue'
 import { statisticsService } from '@/services/statisticsService'
 import Navbar from '@/components/layout/Navbar.vue'
 import ErrorMessage from '@/components/common/ErrorMessage.vue'
+import { rutasService } from '@/services/routesService'
 
 // Importaciones de Leaflet
 import { LMap, LTileLayer, LMarker, LTooltip } from '@vue-leaflet/vue-leaflet'
@@ -172,6 +170,8 @@ const unusualRatings = ref([])
 const showAllUnusual = ref(false)
 const loading = ref(false)
 const error = ref(null)
+const routesList = ref([])
+
 
 // --- ESTADO CONSULTA 1 (MAPA + BÚSQUEDA) ---
 const searchParams = ref({
@@ -259,21 +259,25 @@ const useCurrentLocation = () => {
 }
 
 
-// --- CARGA GENERAL DE ESTADÍSTICAS ---
 const loadAllStatistics = async () => {
   loading.value = true
   try {
     const results = await Promise.allSettled([
-      statisticsService.getTopReviewers(),
+      statisticsService.getTopReviewers(),     
       statisticsService.getProximityAnalysis(),
-      statisticsService.getUnusualRatings()
+      rutasService.getAll()                   
     ])
     
     if (results[0].status === 'fulfilled') topReviewers.value = results[0].value
     if (results[1].status === 'fulfilled') proximityAnalysis.value = results[1].value
-    if (results[2].status === 'fulfilled') unusualRatings.value = results[2].value
+    
+    // 4. ASIGNAR RESULTADO DE RUTAS
+    if (results[2].status === 'fulfilled') {
+      routesList.value = results[2].value
+    }
 
   } catch (err) {
+    console.error(err)
     error.value = 'Error al cargar estadísticas generales'
   } finally {
     loading.value = false

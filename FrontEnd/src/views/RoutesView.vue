@@ -1,6 +1,11 @@
 <template>
   <div class="routes-container">
-    <h2 class="title">Rutas Turisticas</h2>
+    <div class="header-row">
+      <h2 class="title">Rutas Turísticas</h2>
+      <button @click="$router.push('/rutas/crear')" class="btn-add">
+        + Agregar Nueva Ruta
+      </button>
+    </div>
 
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
@@ -19,7 +24,6 @@
     </div>
 
     <div v-else class="content-wrapper">
-      <!-- Mapa con visualizacion de rutas -->
       <div class="map-section">
         <div class="map-container">
           <l-map
@@ -34,7 +38,6 @@
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
 
-            <!-- Polylines de todas las rutas -->
             <l-polyline
               v-for="ruta in rutas"
               :key="'route-' + ruta.id"
@@ -43,7 +46,6 @@
               @click="selectRuta(ruta)"
             />
 
-            <!-- Marcadores de inicio y fin para ruta seleccionada -->
             <template v-if="selectedRuta && selectedRouteCoords.length > 0">
               <l-marker :lat-lng="selectedRouteCoords[0]" :icon="startIcon">
                 <l-popup>
@@ -59,7 +61,6 @@
           </l-map>
         </div>
 
-        <!-- Info de ruta seleccionada -->
         <div v-if="selectedRuta" class="selected-route-info">
           <button class="close-btn" @click="selectedRuta = null">&times;</button>
           <h3>{{ selectedRuta.nombre }}</h3>
@@ -81,7 +82,6 @@
         </div>
       </div>
 
-      <!-- Grid de tarjetas -->
       <div class="routes-grid">
         <div
           v-for="ruta in rutas"
@@ -174,7 +174,6 @@ const getRouteCoordinates = (ruta) => {
   try {
     const geo = JSON.parse(ruta.geoJson)
     if (geo.type === 'LineString' && geo.coordinates) {
-      // GeoJSON es [lon, lat], Leaflet necesita [lat, lon]
       return geo.coordinates.map(coord => [coord[1], coord[0]])
     }
   } catch (e) {
@@ -215,7 +214,6 @@ const fetchRutas = async () => {
     const response = await axios.get(API_URL)
     rutas.value = response.data
 
-    // Auto-seleccionar primera ruta y ajustar mapa
     await nextTick()
     if (rutas.value.length > 0) {
       selectRuta(rutas.value[0])
@@ -243,12 +241,35 @@ onMounted(fetchRutas)
   margin: 0 auto;
 }
 
-.title {
-  text-align: center;
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 24px;
+}
+
+.title {
+  margin: 0;
   color: #2c3e50;
   font-size: 2rem;
   font-weight: 600;
+}
+
+.btn-add {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.btn-add:hover {
+  background-color: #219150;
 }
 
 .content-wrapper {
@@ -516,6 +537,12 @@ onMounted(fetchRutas)
 }
 
 @media (max-width: 768px) {
+  .header-row {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
   .map-container {
     height: 350px;
   }
