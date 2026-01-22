@@ -3,6 +3,7 @@ Mapa Colaborativo de Sitios Turísticos
 
 Laboratorio 1 - Taller de Base de Datos
 Grupo 5
+
 ---
 
 Descripción General
@@ -20,6 +21,7 @@ Normalización: Tercera Forma Normal (3FN)
 Características especiales: Datos geoespaciales, triggers automáticos, vistas materializadas
 
 ---
+
 Diagrama Entidad-Relación
 
 Relaciones:
@@ -30,6 +32,7 @@ Relaciones:
 - sitios → fotografias (1:N): Un sitio puede tener múltiples fotos
 - usuarios → reseñas (1:N): Un usuario puede escribir múltiples reseñas
 - usuarios → fotografias (1:N): Un usuario puede subir múltiples fotos
+- usuarios → rutas_sugeridas (1:N): Un usuario puede crear múltiples rutas de viaje.
 
 ---
 
@@ -71,8 +74,9 @@ CREATE TABLE sitios_turisticos (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     descripcion TEXT,
+    ciudad VARCHAR(100),
     tipo VARCHAR(50),
-    coordenadas GEOGRAPHY(POINT, 4326),
+    ubicacion GEOGRAPHY(POINT, 4326),
     calificacion_promedio DECIMAL(3, 2) DEFAULT 0.0,
     total_reseñas INT DEFAULT 0
 );
@@ -83,7 +87,7 @@ Columnas:
 - nombre: Nombre del lugar (ej: "Teatro Municipal")
 - descripcion: Descripción detallada del sitio
 - tipo: Categoría (ej: 'Parque', 'Museo', 'Restaurante', 'Teatro')
-- coordenadas: Punto geográfico (longitud, latitud) en formato WGS 84
+- ubicacion: Punto geográfico (longitud, latitud) en formato WGS 84
 - calificacion_promedio: Calificación calculada automáticamente por trigger
 - total_reseñas: Contador actualizado automáticamente por trigger
 
@@ -212,10 +216,54 @@ CREATE TABLE seguidores (
     UNIQUE (id_seguidor, id_seguido)
 );
 
+Consulta de Lista de Seguidores con Estado
+La API enriquece la lista de seguidores verificando en tiempo real si el usuario actual también sigue a las personas listadas.
+
+sql
+SELECT
+    u.id, u.nombre,
+    EXISTS(
+        SELECT 1 FROM seguidores s2
+        WHERE s2.id_seguidor = :id_usuario_actual
+        AND s2.id_seguido = u.id
+    ) AS sigue_al_usuario_actual
+FROM seguidores s
+JOIN usuarios u ON s.id_seguidor = u.id
+WHERE s.id_seguido = :id_usuario_perfil;
+
 
 Constraints Especiales:
 - CHECK (id_seguidor != id_seguido) - Evita que un usuario se siga a sí mismo
 - UNIQUE (id_seguidor, id_seguido) - Previene seguir dos veces al mismo usuario
+
+--- 
+
+8. rutas_sugeridas
+Almacena recorridos o rutas sugeridas creadas por los usuarios.
+
+sql
+CREATE TABLE rutas_sugeridas (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    id_usuario INT NOT NULL,
+    camino GEOMETRY(LINESTRING, 4326),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+
+Columnas:
+- id: Identificador único de la ruta.
+- nombre: Título de la ruta.
+- descripcion: Detalle del recorrido.
+- id_usuario: Creador de la ruta.
+- camino: Geometría tipo LINESTRING que representa el trazado de la ruta.
+- fecha_creacion: Fecha de publicación.
+
+Tipo Especial:
+- GEOMETRY(LINESTRING, 4326): Almacena una secuencia de puntos conectados.
 
 ---
 
@@ -310,16 +358,34 @@ Parámetros:
 - user_lat: Latitud del punto de referencia (-90 a 90)
 - radio_metros: Distancia máxima en metros
 
-Ejemplo de uso:
+Ejemplo de uso en Backend (API):
+La aplicación consume este procedimiento seleccionando campos específicos, calculando la distancia exacta en metros y ordenando los resultados por cercanía.
+
 sql
--- Buscar sitios a menos de 500m de las coordenadas de Plaza de Armas
-SELECT * FROM buscar_sitios_cercanos(-70.6483, -33.4372, 500);
+SELECT
+    s.id,
+    s.nombre,
+    s.descripcion,
+    s.tipo,
+    s.calificacion_promedio,
+    s.total_reseñas,
+    ST_Y(s.ubicacion::geometry) AS latitud,
+    ST_X(s.ubicacion::geometry) AS longitud,
+    ST_Distance(
+        s.ubicacion, 
+        ST_MakePoint(:longitud, :latitud)::geography
+    ) AS distancia
+FROM buscar_sitios_cercanos(:longitud, :latitud, :radio) s
+ORDER BY distancia ASC;
 
 
 Funciones PostGIS utilizadas:
-- ST_MakePoint(long, lat): Crea un punto geométrico
-- geography Convierte a tipo geography para cálculos en metros
-- ST_DWithin(geog1, geog2, distancia): Verifica si dos puntos están dentro de una distancia
+- ST_MakePoint(long, lat): Crea un punto geométrico.
+- geography: Convierte a tipo geography para cálculos precisos en metros.
+- ST_DWithin(geog1, geog2, distancia): (Usada internamente) Verifica si dos puntos están dentro del radio.
+- ST_Distance(geog1, geog2): Calcula la distancia exacta en metros para el ordenamiento.
+- ST_X / ST_Y: Extraen la longitud y latitud respectivamente desde la geometría.
+
 ---
 
 Vistas Materializadas
@@ -353,10 +419,12 @@ Columnas:
 - total_fotos: Cantidad de fotos subidas
 - total_listas: Cantidad de listas creadas
 
-Uso en aplicación:
+Uso en aplicación (Ranking Global):
+El backend utiliza esta vista para obtener la lista completa de usuarios ordenada por actividad (Leaderboard), sin recalcular los conteos en cada petición.
+
 sql
--- Consulta rápida de estadísticas (no recalcula, lee datos pre-procesados)
-SELECT * FROM resumen_contribuciones_usuario WHERE id_usuario = 5;
+SELECT * FROM resumen_contribuciones_usuario
+ORDER BY total_reseñas DESC;
 
 
 Actualización:
@@ -455,11 +523,13 @@ sql
 SELECT
     tipo,
     AVG(calificacion_promedio) AS calificacion_promedio_general,
-    SUM(total_resenas) AS total_resenas_general
+    SUM(total_reseñas) AS total_reseñas_general
 FROM
     sitios_turisticos
 GROUP BY
-    tipo;
+    tipo
+ORDER BY
+    total_reseñas_general DESC;
 
 
 Resultado esperado:
@@ -534,7 +604,10 @@ FROM
     sitios_turisticos
 WHERE
     calificacion_promedio > 4.5
-    AND total_resenas < 10;
+    AND total_resenas < 10
+    AND total_reseñas > 0
+ORDER BY
+    calificacion_promedio DESC;
 
 ---
 
@@ -635,6 +708,41 @@ SELECT * FROM resumen_contribuciones_usuario;
 -- Refrescar datos
 REFRESH MATERIALIZED VIEW CONCURRENTLY resumen_contribuciones_usuario;
 
+---
+NUEVAS CONSULTAS AGREGADAS
+---
+
+Consulta Nueva: Buscar sitios dentro de una zona (Polígono)
+Propósito: Filtrar sitios turísticos que se encuentren estrictamente dentro de un área dibujada por el usuario en el mapa.
+
+sql
+SELECT
+    id, nombre, descripcion, tipo, calificacion_promedio, total_reseñas,
+    ST_Y(ubicacion::geometry) AS latitud,
+    ST_X(ubicacion::geometry) AS longitud
+FROM sitios_turisticos
+WHERE ST_Covers(
+    ST_GeomFromText('POLYGON((x1 y1, x2 y2, x3 y3, ..., x1 y1))', 4326),
+    ubicacion::geometry
+);
+
+
+Funciones PostGIS utilizadas:
+- ST_GeomFromText: Convierte un string WKT (Well-Known Text) a geometría.
+- ST_Covers: Retorna verdadero si ningun punto de la geometría B (sitio) está fuera de la geometría A (polígono). Es más preciso que ST_Contains para bordes.
+
+--- 
+
+Consulta Extra: Top 10 Sitios Populares
+Propósito: Mostrar en la página principal los sitios mejor valorados que tengan actividad.
+
+sql
+SELECT *
+FROM sitios_turisticos
+WHERE total_reseñas > 0
+ORDER BY calificacion_promedio DESC, total_reseñas DESC
+LIMIT 10;
+
 
 ---
 
@@ -680,6 +788,15 @@ Justificación:
 - Perfiles de usuario se consultan frecuentemente
 - Evita 3 subconsultas COUNT() en cada perfil
 - REFRESH CONCURRENTLY permite actualizaciones sin bloqueos
+
+---
+
+5. Manejo de Geometrías Complejas (WKT y GeoJSON)
+Decisión: Uso de WKT (Well-Known Text) para inserciones y GeoJSON para lecturas de rutas.
+
+Justificación:
+- Inserción (WKT): Para crear rutas (`LINESTRING`) o zonas de búsqueda (`POLYGON`), se construyen cadenas de texto estándar (ej: `LINESTRING(x y, x y...)`) en Java y se convierten con `ST_GeomFromText`. Esto simplifica la transferencia de estructuras complejas desde el frontend sin requerir mapeo de objetos complejos.
+- Lectura (GeoJSON): Al consultar rutas, se utiliza `ST_AsGeoJSON(camino)`. Esto entrega la geometría en un formato JSON estándar que librerías de mapas (como Leaflet) pueden renderizar directamente, evitando el parsing manual de coordenadas binarias o texto plano en el cliente.
 
 ---
 
