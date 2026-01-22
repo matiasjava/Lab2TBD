@@ -17,6 +17,9 @@ public class RutaController {
 
     private final RutaService service;
 
+    /**
+     * Consulta #4: Si existen rutas guardadas, calcular la longitud total del recorrido en kilómetros usando ST_Length.
+     */
     @GetMapping
     public ResponseEntity<List<Ruta>> getAll() {
         try {
